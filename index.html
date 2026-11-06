@@ -4,9 +4,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#edf4ed">
-    <meta name="description" content="Conheça Mew em 3D e coloque a criatura na sua mesa com realidade aumentada.">
+    <meta name="description" content="Conheça Mew em 3D e encontre a criatura no ambiente local com realidade aumentada compatível.">
     <title>Mew — Mundo de bolso</title>
     <link rel="stylesheet" href="./styles.css">
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+        }
+      }
+    </script>
     <script type="module" src="./app.js"></script>
   </head>
   <body>
@@ -25,7 +33,7 @@
         <div class="viewer-column">
           <figure id="palco" class="stage">
             <div class="stage-heading">
-              <span>Prévia do objeto</span>
+              <span>Prévia 3D</span>
               <span class="stage-mark" aria-hidden="true">3D</span>
             </div>
             <div class="tabletop" aria-hidden="true"></div>
@@ -42,7 +50,7 @@
               shadow-softness="0.9"
               exposure="1"
               ar
-              ar-modes="webxr scene-viewer quick-look"
+              ar-modes="scene-viewer quick-look"
               ar-placement="floor"
               ar-scale="auto"
               loading="eager"
@@ -56,43 +64,45 @@
           <p id="estado-visualizador" class="viewer-caption" role="status" aria-live="polite">
             A prévia em 3D ficará disponível após o carregamento.
           </p>
+          <button id="botao-animacao-preview" class="text-button" type="button" hidden>Pausar animação da prévia</button>
         </div>
 
         <div class="object-column">
           <p class="object-kicker"><span class="kicker-dot" aria-hidden="true"></span> Objeto do QR code</p>
           <h1 id="nome-objeto">Mew</h1>
           <p id="descricao-objeto" class="object-description">Uma pequena criatura de olhos azuis e cauda comprida.</p>
-          <p class="object-hint">Gire Mew com um dedo. Quando quiser, leve-o para a sua mesa.</p>
+          <p class="object-hint">Na RA compatível, Mew surge em uma superfície próxima e fica naquele ponto durante esta sessão. Não usamos mapa nem GPS.</p>
 
           <div class="actions">
             <button id="botao-ra" class="button button-primary" type="button" disabled>
-              Preparando RA…
+              Preparando encontro…
             </button>
             <a class="button button-secondary" href="#palco">Explorar em 3D</a>
           </div>
+          <button id="botao-ra-manual" class="button button-secondary manual-ar-button" type="button" hidden>Alternativa: RA manual do aparelho</button>
           <p id="aviso-ra" class="ar-note" role="status" aria-live="polite">
-            A RA será iniciada somente quando você tocar no botão.
+            A câmera só será solicitada depois que você iniciar a experiência.
           </p>
         </div>
       </section>
 
       <section id="como-funciona" class="how-it-works" aria-labelledby="titulo-como-funciona">
         <div class="section-heading">
-          <p class="section-kicker">Na sua mesa</p>
-          <h2 id="titulo-como-funciona">Três passos até a visita</h2>
+          <p class="section-kicker">No ambiente ao redor</p>
+          <h2 id="titulo-como-funciona">Como encontrar Mew</h2>
         </div>
         <ol class="steps">
           <li>
             <span class="step-number" aria-hidden="true">1</span>
-            <div><h3>Encontre uma mesa</h3><p>Escolha uma superfície plana e bem iluminada.</p></div>
+            <div><h3>Permita a câmera</h3><p>Ela só é iniciada depois do toque no botão de RA.</p></div>
           </li>
           <li>
             <span class="step-number" aria-hidden="true">2</span>
-            <div><h3>Mova o celular devagar</h3><p>Deixe o visualizador reconhecer a superfície.</p></div>
+            <div><h3>Reconheça o espaço</h3><p>Mova o celular devagar. No Chrome Android compatível, Mew aparece ao detectar uma superfície horizontal próxima.</p></div>
           </li>
           <li>
             <span class="step-number" aria-hidden="true">3</span>
-            <div><h3>Toque para posicionar</h3><p>Use os gestos do aparelho para ajustar o objeto.</p></div>
+            <div><h3>Procure ao redor</h3><p>Mova-se e olhe para outros lados. Mew fica no mesmo ponto e anima enquanto você o observa.</p></div>
           </li>
         </ol>
       </section>
@@ -118,9 +128,22 @@
       </section>
     </main>
 
+    <canvas id="xr-canvas" class="xr-canvas" aria-hidden="true"></canvas>
+    <section id="xr-overlay" class="xr-overlay" aria-label="Controles do encontro em realidade aumentada" hidden>
+      <div class="xr-hud">
+        <p class="xr-kicker"><span class="xr-live-dot" aria-hidden="true"></span> Encontro em RA</p>
+        <p id="xr-estado" class="xr-status" role="status" aria-live="polite">Preparando a câmera e o rastreamento…</p>
+        <p id="xr-dica" class="xr-hint">Mova o celular devagar para encontrar uma superfície horizontal próxima.</p>
+        <div class="xr-actions">
+          <button id="xr-pausar" class="xr-control-button" type="button">Pausar animação</button>
+          <button id="xr-encerrar" class="xr-control-button xr-control-stop" type="button">Encerrar encontro</button>
+        </div>
+      </div>
+    </section>
+
     <footer class="site-footer">
-      <span>Um objeto, uma mesa, um pequeno mundo.</span>
-      <span>Protótipo de RA de superfície</span>
+      <span>Um encontro local, sem mapa nem GPS.</span>
+      <span>Prévia 3D e RA de superfície</span>
     </footer>
   </body>
 </html>

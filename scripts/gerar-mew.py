@@ -24,16 +24,18 @@ buffer_views: list[dict] = []
 accessors: list[dict] = []
 
 
-def append_view(payload: bytes, target: int) -> int:
+def append_view(payload: bytes, target: int | None) -> int:
     align(binary)
     offset = len(binary)
     binary.extend(payload)
-    buffer_views.append({
+    buffer_view = {
         "buffer": 0,
         "byteOffset": offset,
         "byteLength": len(payload),
-        "target": target,
-    })
+    }
+    if target is not None:
+        buffer_view["target"] = target
+    buffer_views.append(buffer_view)
     return len(buffer_views) - 1
 
 
@@ -63,6 +65,28 @@ def add_index_accessor(values: list[int]) -> int:
         "min": [min(values)],
         "max": [max(values)],
     })
+    return len(accessors) - 1
+
+
+def add_animation_accessor(
+    values: list[float],
+    accessor_type: str,
+    minimum: list[float] | None = None,
+    maximum: list[float] | None = None,
+) -> int:
+    component_count = {"SCALAR": 1, "VEC3": 3, "VEC4": 4}[accessor_type]
+    view = append_view(struct.pack(f"<{len(values)}f", *values), None)
+    accessor = {
+        "bufferView": view,
+        "componentType": 5126,
+        "count": len(values) // component_count,
+        "type": accessor_type,
+    }
+    if minimum is not None:
+        accessor["min"] = minimum
+    if maximum is not None:
+        accessor["max"] = maximum
+    accessors.append(accessor)
     return len(accessors) - 1
 
 
@@ -176,6 +200,8 @@ meshes.append({
 })
 
 nodes: list[dict] = []
+node_indices: dict[str, int] = {}
+parented_node_indices: set[int] = set()
 
 
 def add_sphere(
@@ -194,11 +220,13 @@ def add_sphere(
     if rotation_z_degrees:
         half_angle = math.radians(rotation_z_degrees) / 2
         node["rotation"] = [0, 0, math.sin(half_angle), math.cos(half_angle)]
+    node_indices[name] = len(nodes)
     nodes.append(node)
 
 
 def add_cone(name: str, translation: tuple[float, float, float], scale: tuple[float, float, float], rotation_z_degrees: float) -> None:
     half_angle = math.radians(rotation_z_degrees) / 2
+    node_indices[name] = len(nodes)
     nodes.append({
         "name": name,
         "mesh": pink_cone_mesh,
@@ -206,6 +234,21 @@ def add_cone(name: str, translation: tuple[float, float, float], scale: tuple[fl
         "scale": list(scale),
         "rotation": [0, 0, math.sin(half_angle), math.cos(half_angle)],
     })
+
+
+def group_nodes(name: str, child_indices: list[int], pivot: tuple[float, float, float]) -> int:
+    for child_index in child_indices:
+        child = nodes[child_index]
+        translation = child.get("translation", [0, 0, 0])
+        child["translation"] = [translation[axis] - pivot[axis] for axis in range(3)]
+    group_index = len(nodes)
+    nodes.append({
+        "name": name,
+        "translation": list(pivot),
+        "children": child_indices,
+    })
+    parented_node_indices.update(child_indices)
+    return group_index
 
 
 def catmull_rom(points: list[tuple[float, float, float]], steps: int = 8) -> list[tuple[float, float, float]]:
@@ -243,7 +286,7 @@ def unit_quaternion_from_y(direction: tuple[float, float, float]) -> list[float]
     return [qx / norm, qy / norm, qz / norm, qw / norm]
 
 
-def add_tail() -> None:
+def add_tail() -> list[int]:
     curve = catmull_rom([
         (0.02, 0.23, -0.09),
         (-0.20, 0.16, -0.10),
@@ -253,6 +296,7 @@ def add_tail() -> None:
         (-0.28, 0.73, -0.04),
         (-0.18, 0.72, -0.02),
     ])
+    tail_indices: list[int] = []
     for index, point in enumerate(curve):
         before = curve[max(0, index - 1)]
         after = curve[min(len(curve) - 1, index + 1)]
@@ -260,17 +304,21 @@ def add_tail() -> None:
         amount = index / (len(curve) - 1)
         radius = 0.030 * (1 - amount) ** 0.82 + 0.006
         step_length = math.sqrt(sum((after[axis] - point[axis]) ** 2 for axis in range(3)))
+        name = f"Cauda curva {index + 1:02d}"
+        node_indices[name] = len(nodes)
+        tail_indices.append(len(nodes))
         nodes.append({
-            "name": f"Cauda curva {index + 1:02d}",
+            "name": name,
             "mesh": 0,
             "translation": list(point),
             "scale": [radius, max(step_length * 0.9, radius * 0.75), radius],
             "rotation": unit_quaternion_from_y(tangent),
         })
+    return tail_indices
 
 
 # Cauda longa e curva atrás do corpo.
-add_tail()
+tail_group_index = group_nodes("Cauda", add_tail(), (0.02, 0.23, -0.09))
 
 # Corpo compacto sentado, com pernas e pés à frente.
 add_sphere("Quadril", 0, (0, 0.20, -0.005), (0.15, 0.15, 0.125))
@@ -286,11 +334,18 @@ add_sphere("Interior da orelha esquerda", 2, (-0.135, 0.685, 0.040), (0.025, 0.0
 add_sphere("Interior da orelha direita", 2, (0.135, 0.685, 0.040), (0.025, 0.082, 0.012), -22)
 
 # Olhos grandes azul-turquesa, pupilas escuras e brilhos.
+eye_group_indices: dict[str, int] = {}
 for side, x in (("esquerdo", -0.073), ("direito", 0.073)):
     add_sphere(f"Olho {side}", 5, (x, 0.572, 0.139), (0.047, 0.058, 0.027))
     add_sphere(f"Íris {side}", 3, (x, 0.570, 0.160), (0.029, 0.041, 0.018))
     add_sphere(f"Pupila {side}", 4, (x, 0.569, 0.175), (0.014, 0.029, 0.012))
     add_sphere(f"Brilho {side}", 5, (x - 0.008, 0.589, 0.185), (0.009, 0.012, 0.006))
+    eye_children = [node_indices[f"{part} {side}"] for part in ("Olho", "Íris", "Pupila", "Brilho")]
+    eye_group_indices[side] = group_nodes(
+        f"Olho {side} - piscar",
+        eye_children,
+        (x, 0.572, 0.139),
+    )
 
 add_sphere("Nariz", 2, (0, 0.505, 0.148), (0.018, 0.013, 0.011))
 add_sphere("Bochecha esquerda", 1, (-0.12, 0.495, 0.113), (0.029, 0.018, 0.014))
@@ -309,11 +364,116 @@ add_sphere("Coxa direita", 0, (0.105, 0.18, 0.045), (0.085, 0.095, 0.10), 16)
 add_sphere("Pé esquerdo", 1, (-0.145, 0.095, 0.12), (0.115, 0.062, 0.14), -9)
 add_sphere("Pé direito", 1, (0.145, 0.095, 0.12), (0.115, 0.062, 0.14), 9)
 
+# Junta rosto e olhos para que a cabeça possa acompanhar a animação sem separar as feições.
+head_group_index = group_nodes(
+    "Cabeça",
+    [
+        node_indices[name]
+        for name in (
+            "Cabeça",
+            "Orelha esquerda",
+            "Orelha direita",
+            "Interior da orelha esquerda",
+            "Interior da orelha direita",
+            "Nariz",
+            "Bochecha esquerda",
+            "Bochecha direita",
+            "Sorriso",
+        )
+    ] + list(eye_group_indices.values()),
+    (0, 0.56, 0.014),
+)
+
+
+def quaternion_for_axis(axis: str, angle: float) -> list[float]:
+    half_angle = angle / 2
+    sine = math.sin(half_angle)
+    if axis == "x":
+        return [sine, 0, 0, math.cos(half_angle)]
+    if axis == "y":
+        return [0, sine, 0, math.cos(half_angle)]
+    return [0, 0, sine, math.cos(half_angle)]
+
+
+def multiply_quaternions(first: list[float], second: list[float]) -> list[float]:
+    ax, ay, az, aw = first
+    bx, by, bz, bw = second
+    return [
+        aw * bx + ax * bw + ay * bz - az * by,
+        aw * by - ax * bz + ay * bw + az * bx,
+        aw * bz + ax * by - ay * bx + az * bw,
+        aw * bw - ax * bx - ay * by - az * bz,
+    ]
+
+
+animation_samplers: list[dict] = []
+animation_channels: list[dict] = []
+
+
+def add_animation_track(
+    times_accessor: int,
+    values: list[float],
+    accessor_type: str,
+    node_index: int,
+    path: str,
+    interpolation: str = "LINEAR",
+) -> None:
+    output_accessor = add_animation_accessor(values, accessor_type)
+    sampler_index = len(animation_samplers)
+    animation_samplers.append({
+        "input": times_accessor,
+        "output": output_accessor,
+        "interpolation": interpolation,
+    })
+    animation_channels.append({
+        "sampler": sampler_index,
+        "target": {"node": node_index, "path": path},
+    })
+
+
+idle_times = [0, 1.5, 3, 4.5, 6]
+idle_times_accessor = add_animation_accessor(idle_times, "SCALAR", [0], [6])
+tail_angles = [0, 0.12, 0, -0.12, 0]
+tail_rotations = [value for angle in tail_angles for value in quaternion_for_axis("z", angle)]
+add_animation_track(idle_times_accessor, tail_rotations, "VEC4", tail_group_index, "rotation")
+
+head_rotations: list[float] = []
+for nod_angle, tilt_angle in zip((0, 0.035, 0, -0.035, 0), (0, 0.02, 0, -0.02, 0)):
+    head_rotations.extend(multiply_quaternions(
+        quaternion_for_axis("z", tilt_angle),
+        quaternion_for_axis("x", nod_angle),
+    ))
+add_animation_track(idle_times_accessor, head_rotations, "VEC4", head_group_index, "rotation")
+
+body_heights = [0.34, 0.344, 0.34, 0.336, 0.34]
+body_translations = [component for height in body_heights for component in (0, height, 0.005)]
+add_animation_track(idle_times_accessor, body_translations, "VEC3", node_indices["Tronco"], "translation")
+
+blink_times = [0, 1.8, 1.9, 2.05, 2.15, 4.8, 4.9, 5.05, 5.15, 6]
+blink_times_accessor = add_animation_accessor(blink_times, "SCALAR", [0], [6])
+eye_scales = [
+    1, 1, 1,
+    1, 1, 1,
+    1, 0.08, 1,
+    1, 0.08, 1,
+    1, 1, 1,
+    1, 1, 1,
+    1, 0.08, 1,
+    1, 0.08, 1,
+    1, 1, 1,
+    1, 1, 1,
+]
+for eye_group_index in eye_group_indices.values():
+    add_animation_track(blink_times_accessor, eye_scales, "VEC3", eye_group_index, "scale")
+
+# A raiz mantém os nós de animação e as partes independentes na mesma cena.
+root_children = [index for index in range(len(nodes)) if index not in parented_node_indices]
+
 # Raiz dimensiona o personagem para uma experiência de mesa.
 root_node_index = len(nodes)
 nodes.append({
     "name": "Mew em escala de mesa",
-    "children": list(range(root_node_index)),
+    "children": root_children,
     "scale": [0.46, 0.46, 0.46],
 })
 
@@ -327,6 +487,11 @@ gltf = {
     "accessors": accessors,
     "bufferViews": buffer_views,
     "buffers": [{"byteLength": len(binary)}],
+    "animations": [{
+        "name": "Idle",
+        "samplers": animation_samplers,
+        "channels": animation_channels,
+    }],
 }
 
 json_chunk = json.dumps(gltf, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
