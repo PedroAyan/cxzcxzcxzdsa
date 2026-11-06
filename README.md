@@ -2,6 +2,8 @@
 
 Protótipo web para abrir Mew por link, explorar o modelo em 3D e iniciar RA no visualizador compatível do aparelho. O GLB é uma interpretação 3D estilizada construída para este protótipo a partir da imagem de referência fornecida; não foi baixado de um catálogo de modelos.
 
+**[Abrir a página do Mew](https://pedroayan.github.io/cxzcxzcxzdsa/?obj=mew)**
+
 ## Executar localmente
 
 Na pasta do projeto, inicie um servidor estático:
@@ -33,4 +35,3 @@ Para substituir o modelo, coloque o novo GLB em `models/mew.glb` ou altere o cam
 O toque em **Ver em RA** chama `<model-viewer>` apenas depois da ação da pessoa. A detecção de superfície acontece no visualizador do aparelho. O código oferece WebXR, Scene Viewer e Quick Look e define posicionamento horizontal. O acesso à câmera é pedido pelo modo de RA, nunca ao abrir a página.
 
 Para testar RA em um celular, publique por HTTPS e abra o link no próprio aparelho. A compatibilidade, a permissão de câmera e o rastreamento variam por navegador, sistema e dispositivo. Este protótipo não foi validado em iPhone ou Android. Se a RA não estiver disponível, o modelo continua giratório em 3D na página.
-
