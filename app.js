@@ -4,8 +4,8 @@ const OBJETO = {
   id: "mew",
   nome: "Mew",
   descricao: "Uma pequena criatura de olhos azuis e cauda comprida.",
-  glb: new URL("./models/mew.glb", import.meta.url).href,
-  usdz: new URL("./models/mew.usdz", import.meta.url).href
+  glb: new URL("./models/mew.glb?v=mew-original-1", import.meta.url).href,
+  usdz: new URL("./models/mew.usdz?v=mew-original-1", import.meta.url).href
 };
 
 const MODEL_VIEWER_MODULE = "https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/model-viewer.min.js";

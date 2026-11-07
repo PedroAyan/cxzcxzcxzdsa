@@ -1,3 +1,13 @@
+# Modelo substituído pelo ZIP enviado — 06/11/2026
+
+O modelo exibido agora vem do arquivo `Wii U - Super Smash Bros. for Wii U - Pokemon - Mew.zip` enviado pelo usuário. Fonte informada: [Mew / The Models Resource](https://models.spriters-resource.com/wii_u/supersmashbrosforwiiu/asset/291872/), publicação de Ploaj, conteúdo identificado como Super Smash Bros. for Wii U. Não é um modelo original criado neste projeto; não se atribui a ele automaticamente a licença CC do upload separado no Sketchfab.
+
+A conversão preserva a geometria e a textura PNG, com 2.230 vértices, 3.358 triângulos e 34 ossos. Normais foram suavizadas nas costuras, a cauda foi curvada e o enquadramento da prévia foi ajustado. A animação Idle de seis segundos foi criada no projeto: 15 canais de rotação para tronco, pescoço, cabeça, braços e cadeia da cauda. Não foram inventadas piscadas que o arquivo não possui. O GLB embute a textura e o esqueleto (aproximadamente 323 KB). O USDZ embute a textura e a deformação amostrada em 61 instantes (aproximadamente 3,45 MB), sem depender de suporte ao esqueleto no visualizador externo.
+
+Para reproduzir a conversão, instale numpy, scipy e usd-core e execute `python scripts/importar-mew.py "CAMINHO_DO_ZIP"`. O ZIP original permanece na área de trabalho. Os geradores `gerar-mew.py` e `gerar-mew-usdz.py` pertencem ao boneco demonstrativo anterior: executá-los sobrescreve o modelo atual. As descrições antigas de geometria, cinco canais e piscadas nas seções abaixo são históricas e não descrevem o arquivo novo.
+
+Validação: prévia real carregada no navegador, textura e pose inspecionadas, controle de pausa verificado. Os testes de orientação continuam passando. Verificação física de câmera/sensores e animação no Quick Look continua pendente.
+
 # Modo principal atualizado — câmera e orientação
 
 O botão principal agora abre a câmera na página e pede orientação no gesto inicial (incluindo a permissão de movimento do iOS). Não usa Quick Look, hit-test ou reconhecimento de mesa. Mew aparece uma única vez a cerca de 20 graus ao lado da direção inicial e executa o clip Idle. A rotação do celular altera a câmera 3D, sem reposicionar o personagem para acompanhar a tela. A distância de 1,3 unidade e o deslocamento vertical são virtuais, não medidas do ambiente. O vídeo usa recorte para preencher a tela e FOV aproximado: não há calibração óptica nem oclusão. Caminhar não muda a perspectiva; sensores podem apresentar deriva.
