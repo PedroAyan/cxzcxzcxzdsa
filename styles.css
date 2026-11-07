@@ -628,6 +628,10 @@ body.xr-active { overscroll-behavior: none; }
   gap: 9px;
 }
 
+.model-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.model-controls button { flex: 1; min-width: 44px; }
+.model-controls button:disabled { opacity: 0.4; cursor: default; }
+
 .xr-control-button {
   min-height: 44px;
   padding: 9px 13px;

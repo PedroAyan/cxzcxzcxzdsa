@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#edf4ed">
     <meta name="description" content="Conheça Mew em 3D e encontre a criatura no ambiente local com realidade aumentada compatível.">
     <title>Mew — Mundo de bolso</title>
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./styles.css?v=controls-1">
     <script type="importmap">
       {
         "imports": {
@@ -15,7 +15,7 @@
         }
       }
     </script>
-    <script type="module" src="./app.js?v=mew-original-1"></script>
+    <script type="module" src="./app.js?v=controls-1"></script>
   </head>
   <body>
     <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -66,6 +66,12 @@
             A prévia em 3D ficará disponível após o carregamento.
           </p>
           <button id="botao-animacao-preview" class="text-button" type="button" hidden>Pausar animação da prévia</button>
+          <div class="model-controls" role="group" aria-label="Girar e ampliar a prévia 3D">
+            <button class="xr-control-button" type="button" data-preview="left" disabled aria-label="Girar prévia para a esquerda">↶ Girar</button>
+            <button class="xr-control-button" type="button" data-preview="right" disabled aria-label="Girar prévia para a direita">Girar ↷</button>
+            <button class="xr-control-button" type="button" data-preview="out" disabled aria-label="Afastar prévia">−</button>
+            <button class="xr-control-button" type="button" data-preview="in" disabled aria-label="Aproximar prévia">+</button>
+          </div>
         </div>
 
         <div class="object-column">
@@ -140,6 +146,12 @@
         <div class="xr-actions">
           <button id="xr-pausar" class="xr-control-button" type="button">Pausar animação</button>
           <button id="xr-encerrar" class="xr-control-button xr-control-stop" type="button">Encerrar encontro</button>
+        </div>
+        <div class="model-controls" role="group" aria-label="Girar e ampliar Mew no encontro">
+          <button class="xr-control-button" type="button" data-encounter="left" disabled aria-label="Girar Mew para a esquerda">↶ Girar</button>
+          <button class="xr-control-button" type="button" data-encounter="right" disabled aria-label="Girar Mew para a direita">Girar ↷</button>
+          <button class="xr-control-button" type="button" data-encounter="out" disabled aria-label="Diminuir Mew">−</button>
+          <button class="xr-control-button" type="button" data-encounter="in" disabled aria-label="Ampliar Mew">+</button>
         </div>
       </div>
     </section>

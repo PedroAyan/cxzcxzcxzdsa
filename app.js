@@ -292,6 +292,7 @@ function initializeExperience() {
 
     scene.add(anchor);
     placedRoot = anchor;
+    document.querySelectorAll('[data-encounter]').forEach(button => { button.disabled = false; });
     placedMixer = new THREE.AnimationMixer(model);
     const action = placedMixer.clipAction(animationClip);
     action.setLoop(THREE.LoopRepeat, Infinity);
@@ -445,6 +446,7 @@ function initializeExperience() {
     xrSession = null;
     placedMixer = null;
     placedRoot = null;
+    document.querySelectorAll('[data-encounter]').forEach(button => { button.disabled = true; });
     encounterIsActive = false;
     lastFrameTime = 0;
     trackingWasAvailable = true;
@@ -625,6 +627,32 @@ function initializeExperience() {
   });
 
   manualArButton.addEventListener("click", openManualAr);
+
+  document.querySelectorAll('[data-preview]').forEach(button => {
+    button.addEventListener('click', () => {
+      if (!modelIsLoaded) return;
+      const orbit = viewer.getCameraOrbit();
+      const action = button.dataset.preview;
+      const theta = orbit.theta + (action === 'left' ? -1 : action === 'right' ? 1 : 0) * Math.PI / 6;
+      const radius = Math.max(0.45, Math.min(3, orbit.radius * (action === 'in' ? 0.85 : action === 'out' ? 1 / 0.85 : 1)));
+      viewer.cameraOrbit = `${theta}rad ${orbit.phi}rad ${radius}m`;
+    });
+  });
+  viewer.addEventListener('load', () => {
+    document.querySelectorAll('[data-preview]').forEach(button => { button.disabled = false; });
+  });
+  document.querySelectorAll('[data-encounter]').forEach(button => {
+    button.addEventListener('click', () => {
+      if (!placedRoot) return;
+      const action = button.dataset.encounter;
+      if (action === 'left' || action === 'right') {
+        placedRoot.rotateY((action === 'left' ? -1 : 1) * Math.PI / 6);
+      } else {
+        const size = Math.max(0.4, Math.min(2.5, placedRoot.scale.x * (action === 'in' ? 1.15 : 1 / 1.15)));
+        placedRoot.scale.setScalar(size);
+      }
+    });
+  });
 
   xrPauseButton.addEventListener("click", () => {
     if (!arRuntime) return;

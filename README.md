@@ -1,3 +1,5 @@
+Controles adicionados: setas giram em passos de 30 graus; +/− aproximam a câmera da prévia e alteram a escala virtual no encontro (0,4× a 2,5×). A posição do encontro permanece fixa. Os controles do encontro ficam desativados até Mew aparecer; reiniciar restaura a escala.
+
 # Modelo substituído pelo ZIP enviado — 06/11/2026
 
 O modelo exibido agora vem do arquivo `Wii U - Super Smash Bros. for Wii U - Pokemon - Mew.zip` enviado pelo usuário. Fonte informada: [Mew / The Models Resource](https://models.spriters-resource.com/wii_u/supersmashbrosforwiiu/asset/291872/), publicação de Ploaj, conteúdo identificado como Super Smash Bros. for Wii U. Não é um modelo original criado neste projeto; não se atribui a ele automaticamente a licença CC do upload separado no Sketchfab.
