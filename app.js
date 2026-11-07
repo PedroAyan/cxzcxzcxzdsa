@@ -1,3 +1,5 @@
+import { createOrientationEncounter } from './orientation.js';
+
 const OBJETO = {
   id: "mew",
   nome: "Mew",
@@ -76,6 +78,8 @@ function initializeExperience() {
   let trackingWasAvailable = true;
   let recoveryMessageUntil = 0;
   let lastFrameTime = 0;
+  let orientationEncounter = null;
+  const surfaceMode = params.get('modo') === 'superficie';
 
   function setArNote(message, isError = false) {
     arNote.textContent = message;
@@ -97,6 +101,17 @@ function initializeExperience() {
       arButton.disabled = true;
       arButton.textContent = "Encontro em andamento";
       manualArButton.hidden = true;
+      return;
+    }
+
+    if (!surfaceMode) {
+      const supported = window.isSecureContext && navigator.mediaDevices?.getUserMedia && 'DeviceOrientationEvent' in window;
+      arButton.disabled = !supported || !webxrReady;
+      arButton.textContent = webxrReady ? 'Iniciar encontro em RA' : webxrLoadError ? 'Encontro indisponível' : 'Preparando encontro…';
+      manualArButton.hidden = !externalArAvailable;
+      setArNote(!supported ? 'Câmera e orientação indisponíveis. Abra em HTTPS no Safari ou Chrome do celular.'
+        : webxrLoadError ? 'Não foi possível carregar o encontro. Confira a conexão e recarregue a página.'
+        : 'Sem procurar mesa: permita câmera e movimento, depois vire o celular para encontrar Mew. A direção fica fixa; sua caminhada não é rastreada.');
       return;
     }
 
@@ -294,6 +309,13 @@ function initializeExperience() {
 
   function updateXrFrame(_time, frame) {
     if (!xrSession || !frame || !arRuntime) return;
+    // Desenhe também nos caminhos de procura e recuperação, que retornam cedo.
+    updateEncounterFrame(_time, frame);
+    arRuntime.renderer.render(arRuntime.scene, arRuntime.camera);
+  }
+
+  function updateEncounterFrame(_time, frame) {
+    if (!xrSession || !frame || !arRuntime) return;
 
     const now = performance.now();
     const delta = lastFrameTime ? Math.min((now - lastFrameTime) / 1000, 0.08) : 0;
@@ -305,6 +327,7 @@ function initializeExperience() {
 
     const viewerPose = frame.getViewerPose(activeReferenceSpace);
     if (!viewerPose) {
+      if (placedRoot) placedRoot.visible = false;
       if (trackingWasAvailable) {
         trackingWasAvailable = false;
         setXrStatus(
@@ -315,6 +338,7 @@ function initializeExperience() {
       }
       return;
     }
+    if (placedRoot) placedRoot.visible = !viewerPose.emulatedPosition;
 
     if (viewerPose.emulatedPosition && placedRoot) {
       setXrStatus(
@@ -329,8 +353,20 @@ function initializeExperience() {
     }
 
     if (!hitTestSource || placedRoot) {
-      if (placedRoot && now >= recoveryMessageUntil && !viewerPose.emulatedPosition && xrStatus.textContent !== "Vire o celular para procurar Mew.") {
-        setXrStatus("Vire o celular para procurar Mew.", "Ao voltar a apontar para o ponto inicial, você o encontrará no mesmo lugar.");
+      if (placedRoot && now >= recoveryMessageUntil && !viewerPose.emulatedPosition) {
+        const { THREE } = arRuntime;
+        const cameraMatrix = new THREE.Matrix4().fromArray(viewerPose.transform.matrix);
+        const relative = placedRoot.position.clone().applyMatrix4(cameraMatrix.invert());
+        const view = viewerPose.views[0];
+        const projected = view ? relative.clone().applyMatrix4(new THREE.Matrix4().fromArray(view.projectionMatrix)) : null;
+        const visible = relative.z < 0 && projected && Math.abs(projected.x) < 0.9 && Math.abs(projected.y) < 0.9;
+        const direction = relative.z >= 0
+          ? "Olhe para trás, girando o celular devagar."
+          : Math.abs(projected?.x ?? 0) > 0.9
+            ? (relative.x < 0 ? "Vire o celular para a esquerda." : "Vire o celular para a direita.")
+            : (relative.y < 0 ? "Aponte o celular um pouco para baixo." : "Aponte o celular um pouco para cima.");
+        setXrStatus(visible ? "Mew está à sua frente." : "Procure Mew ao redor.",
+          visible ? "Aproxime-se ou caminhe ao redor. Mew permanece nesse ponto do ambiente." : direction);
       }
       return;
     }
@@ -338,8 +374,6 @@ function initializeExperience() {
     const hits = frame.getHitTestResults(hitTestSource);
     let validHit = null;
     let validTransform = null;
-    let validPosition = null;
-    let validNormal = null;
     const cameraPosition = new arRuntime.THREE.Vector3().setFromMatrixPosition(
       new arRuntime.THREE.Matrix4().fromArray(viewerPose.transform.matrix)
     );
@@ -358,8 +392,6 @@ function initializeExperience() {
 
       validHit = hit;
       validTransform = transform;
-      validPosition = position;
-      validNormal = normal;
       break;
     }
 
@@ -390,7 +422,20 @@ function initializeExperience() {
   }
 
   function cleanUpXrSession() {
+    orientationEncounter?.stop();
+    orientationEncounter = null;
     if (arRuntime?.renderer) arRuntime.renderer.setAnimationLoop(null);
+    if (placedMixer) {
+      placedMixer.stopAllAction();
+      placedMixer.uncacheRoot(placedMixer.getRoot());
+    }
+    if (placedRoot) {
+      arRuntime.scene.remove(placedRoot);
+      // Geometria do modelo é compartilhada com o template; só a sombra é exclusiva.
+      const shadow = placedRoot.children[1];
+      shadow?.geometry?.dispose();
+      shadow?.material?.dispose();
+    }
     if (hitTestSource) {
       try { hitTestSource.cancel(); } catch { /* A sessão pode já ter encerrado o recurso. */ }
     }
@@ -403,6 +448,7 @@ function initializeExperience() {
     encounterIsActive = false;
     lastFrameTime = 0;
     trackingWasAvailable = true;
+    recoveryMessageUntil = 0;
 
     if (arRuntime?.reticleGroup) arRuntime.reticleGroup.visible = false;
     xrOverlay.hidden = true;
@@ -486,7 +532,7 @@ function initializeExperience() {
   function openManualAr() {
     if (!modelIsLoaded || viewer.canActivateAR !== true) return;
     externalArIsActive = true;
-    setViewerCaption("Abrindo o visualizador de RA do aparelho. Esta alternativa exige posicionamento manual.");
+    setViewerCaption("No visualizador, mova o celular devagar apontando para o chão iluminado. Enquanto aparecer ‘Mova o iPhone para iniciar’, Mew é apenas uma prévia. Aguarde reconhecer a superfície e então posicione-o; depois mova a câmera para vê-lo no ambiente.");
     viewer.activateAR();
   }
 
@@ -554,7 +600,27 @@ function initializeExperience() {
   });
 
   arButton.addEventListener("click", () => {
-    if (webxrSupported) startWebXrEncounter();
+    if (!surfaceMode) {
+      if (encounterIsActive || !webxrReady) return;
+      encounterIsActive = true;
+      updateArControls();
+      xrOverlay.hidden = false;
+      document.body.classList.add('xr-active');
+      setXrStatus('Preparando câmera e movimento…', 'Permita o acesso para iniciar sem reconhecer superfícies.');
+      orientationEncounter = createOrientationEncounter({
+        runtime: arRuntime,
+        video: document.querySelector('#camera-encontro'),
+        status: setXrStatus,
+        place: makePlacedCharacter,
+        tick: delta => { if (!arRuntime.animationPaused) placedMixer?.update(delta); },
+        end: message => { cleanUpXrSession(); setArNote(message, true); arButton.focus(); }
+      });
+      orientationEncounter.start();
+      arRuntime.animationPaused = false;
+      updateXrPauseButton();
+      xrEndButton.focus();
+    }
+    else if (webxrSupported) startWebXrEncounter();
     else openManualAr();
   });
 
@@ -582,7 +648,15 @@ function initializeExperience() {
   });
 
   window.addEventListener("pagehide", () => {
+    if (orientationEncounter) cleanUpXrSession();
     if (xrSession && !xrSession.ended) xrSession.end().catch(() => {});
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && orientationEncounter) {
+      cleanUpXrSession();
+      setArNote('Encontro encerrado ao sair da página. Toque em iniciar para abrir a câmera novamente.');
+    }
   });
 
   async function loadModelViewer() {
@@ -615,7 +689,7 @@ function initializeExperience() {
 
   async function prepareEncounter() {
     webxrSupported = await detectWebXRSupport();
-    if (!webxrSupported) {
+    if (surfaceMode && !webxrSupported) {
       updateArControls();
       return;
     }

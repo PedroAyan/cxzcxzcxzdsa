@@ -549,6 +549,20 @@ h1, h2, h3, p { margin-top: 0; }
   touch-action: none;
 }
 
+.encounter-camera {
+  position: fixed;
+  inset: 0;
+  z-index: 49;
+  width: 100%;
+  height: 100dvh;
+  object-fit: cover;
+  background: #111;
+  pointer-events: none;
+}
+
+body.xr-active { overscroll-behavior: none; }
+.xr-control-button { touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+
 .xr-overlay {
   position: fixed;
   z-index: 10000;

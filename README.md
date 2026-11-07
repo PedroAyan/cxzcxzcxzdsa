@@ -1,3 +1,13 @@
+# Modo principal atualizado — câmera e orientação
+
+O botão principal agora abre a câmera na página e pede orientação no gesto inicial (incluindo a permissão de movimento do iOS). Não usa Quick Look, hit-test ou reconhecimento de mesa. Mew aparece uma única vez a cerca de 20 graus ao lado da direção inicial e executa o clip Idle. A rotação do celular altera a câmera 3D, sem reposicionar o personagem para acompanhar a tela. A distância de 1,3 unidade e o deslocamento vertical são virtuais, não medidas do ambiente. O vídeo usa recorte para preencher a tela e FOV aproximado: não há calibração óptica nem oclusão. Caminhar não muda a perspectiva; sensores podem apresentar deriva.
+
+Sem sensores válidos em 10 segundos, o encontro encerra e explica o problema. Sensores interrompidos ocultam o modelo em vez de deixá-lo preso à tela. Encerrar ou sair da página libera câmera, listener e ciclo de renderização. Pausa de animação permanece disponível. O modo de orientação inicia animado; a preferência de movimento reduzido continua aplicada à prévia.
+
+Use HTTPS no celular e permita câmera e movimento. A alternativa manual abre o visualizador do aparelho e continua exigindo superfície. O modo espacial anterior fica disponível por `?obj=mew&modo=superficie`; as seções abaixo descrevem esse modo e os arquivos compartilhados.
+
+Validação física do modo novo em iPhone e Android está pendente. Código local não significa publicação. Referência dos eixos: https://www.w3.org/TR/orientation-event/ .
+
 # Mundo de bolso — encontro de Mew em RA
 
 Protótipo web estático com prévia 3D e um encontro espacial em WebXR. A leitura de QR code continua a cargo da câmera ou do leitor do celular; o endereço aceita `?obj=mew`. Não há mapa, GPS, login nem backend.
@@ -69,6 +79,10 @@ python .\scripts\gerar-mew-usdz.py
 Para trocar o personagem, substitua `models/mew.glb` e `models/mew.usdz` juntos e mantenha uma animação glTF. Se usar o gerador USDZ, instale OpenUSD; o processo produz uma entrada binária USDC dentro do pacote para evitar uma cópia textual grande da geometria.
 
 ## Verificação pendente
+
+Correção local em 06/11/2026: o ciclo WebXR agora chama `renderer.render` em todos os quadros com sessão ativa, inclusive durante procura e recuperação. Antes, a posição era calculada sem desenhar a cena. Ao encerrar, remove o personagem da cena, encerra o mixer e libera a sombra exclusiva, evitando duplicação no próximo encontro. A orientação de procura usa a posição relativa à câmera; em perda de pose o modelo é ocultado até recuperar o rastreamento, preservando sua posição.
+
+A tela do Quick Look com “Mova o iPhone para iniciar” mostra a etapa de reconhecimento, ainda sem colocação confirmada. Mova devagar sobre uma superfície iluminada com detalhes visuais. O site não consegue retirar essa etapa nem controlar a posição dentro do Quick Look. Para o encontro automático em Safari/iPhone, esta implementação continua incompleta: seria necessário integrar outra solução de rastreamento compatível ou um aplicativo nativo. Não foi adicionada uma simulação por sobreposição.
 
 O bloco JSON do GLB foi lido localmente e contém o clip `Idle` com cinco canais. O USDZ abre pelo OpenUSD e contém 35 amostras de tempo distribuídas por cinco atributos animados. Essa verificação confirma a estrutura dos arquivos, mas não comprova o carregamento no navegador nem a reprodução no Quick Look.
 

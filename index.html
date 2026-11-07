@@ -55,6 +55,7 @@
               ar-scale="auto"
               loading="eager"
               reveal="auto">
+              <button slot="ar-button" type="button" hidden aria-hidden="true" tabindex="-1"></button>
             </model-viewer>
             <div id="carregando" class="loading-note" role="status" aria-live="polite">
               <span class="loading-dot" aria-hidden="true"></span>
@@ -71,7 +72,7 @@
           <p class="object-kicker"><span class="kicker-dot" aria-hidden="true"></span> Objeto do QR code</p>
           <h1 id="nome-objeto">Mew</h1>
           <p id="descricao-objeto" class="object-description">Uma pequena criatura de olhos azuis e cauda comprida.</p>
-          <p class="object-hint">Na RA compatível, Mew surge em uma superfície próxima e fica naquele ponto durante esta sessão. Não usamos mapa nem GPS.</p>
+          <p class="object-hint">Mew aparece em uma direção próxima. Vire o celular para encontrá-lo, sem reconhecer mesa ou chão. Este modo usa orientação, sem rastrear sua caminhada.</p>
 
           <div class="actions">
             <button id="botao-ra" class="button button-primary" type="button" disabled>
@@ -83,6 +84,7 @@
           <p id="aviso-ra" class="ar-note" role="status" aria-live="polite">
             A câmera só será solicitada depois que você iniciar a experiência.
           </p>
+          <p class="ar-note">No iPhone, abra pelo Safari e permita câmera e movimento. O encontro abre nesta página. A alternativa “RA manual do aparelho” usa outro modo e continua exigindo reconhecer uma superfície.</p>
         </div>
       </section>
 
@@ -98,11 +100,11 @@
           </li>
           <li>
             <span class="step-number" aria-hidden="true">2</span>
-            <div><h3>Reconheça o espaço</h3><p>Mova o celular devagar. No Chrome Android compatível, Mew aparece ao detectar uma superfície horizontal próxima.</p></div>
+            <div><h3>Permita o movimento</h3><p>Segure o celular à sua frente. Mew aparece sem procurar superfície, usando a orientação do aparelho.</p></div>
           </li>
           <li>
             <span class="step-number" aria-hidden="true">3</span>
-            <div><h3>Procure ao redor</h3><p>Mova-se e olhe para outros lados. Mew fica no mesmo ponto e anima enquanto você o observa.</p></div>
+            <div><h3>Procure ao redor</h3><p>Vire o celular e olhe para os lados. Mew sai da tela e reaparece ao voltar à mesma direção. Caminhar não muda a perspectiva neste modo.</p></div>
           </li>
         </ol>
       </section>
@@ -128,6 +130,7 @@
       </section>
     </main>
 
+    <video id="camera-encontro" class="encounter-camera" muted autoplay playsinline aria-hidden="true" hidden></video>
     <canvas id="xr-canvas" class="xr-canvas" aria-hidden="true"></canvas>
     <section id="xr-overlay" class="xr-overlay" aria-label="Controles do encontro em realidade aumentada" hidden>
       <div class="xr-hud">
@@ -143,7 +146,7 @@
 
     <footer class="site-footer">
       <span>Um encontro local, sem mapa nem GPS.</span>
-      <span>Prévia 3D e RA de superfície</span>
+      <span>Prévia 3D e encontro por orientação</span>
     </footer>
   </body>
 </html>
