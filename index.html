@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#edf4ed">
     <meta name="description" content="Conheça Mew em 3D e encontre a criatura no ambiente local com realidade aumentada compatível.">
     <title>Mew — Mundo de bolso</title>
-    <link rel="stylesheet" href="./styles.css?v=controls-1">
+    <link rel="stylesheet" href="./styles.css?v=clean-camera-1">
     <script type="importmap">
       {
         "imports": {
@@ -15,7 +15,7 @@
         }
       }
     </script>
-    <script type="module" src="./app.js?v=controls-1"></script>
+    <script type="module" src="./app.js?v=clean-camera-1"></script>
   </head>
   <body>
     <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -140,12 +140,13 @@
     <canvas id="xr-canvas" class="xr-canvas" aria-hidden="true"></canvas>
     <section id="xr-overlay" class="xr-overlay" aria-label="Controles do encontro em realidade aumentada" hidden>
       <div class="xr-hud">
-        <p class="xr-kicker"><span class="xr-live-dot" aria-hidden="true"></span> Encontro em RA</p>
         <p id="xr-estado" class="xr-status" role="status" aria-live="polite">Preparando a câmera e o rastreamento…</p>
         <p id="xr-dica" class="xr-hint">Mova o celular devagar para encontrar uma superfície horizontal próxima.</p>
+        <details class="xr-settings">
+          <summary aria-label="Abrir ajustes do encontro">⚙</summary>
+          <div class="xr-settings-panel">
         <div class="xr-actions">
           <button id="xr-pausar" class="xr-control-button" type="button">Pausar animação</button>
-          <button id="xr-encerrar" class="xr-control-button xr-control-stop" type="button">Encerrar encontro</button>
         </div>
         <div class="model-controls" role="group" aria-label="Girar e ampliar Mew no encontro">
           <button class="xr-control-button" type="button" data-encounter="left" disabled aria-label="Girar Mew para a esquerda">↶ Girar</button>
@@ -153,6 +154,9 @@
           <button class="xr-control-button" type="button" data-encounter="out" disabled aria-label="Diminuir Mew">−</button>
           <button class="xr-control-button" type="button" data-encounter="in" disabled aria-label="Ampliar Mew">+</button>
         </div>
+          </div>
+        </details>
+        <button id="xr-encerrar" class="xr-control-button xr-control-stop" type="button" aria-label="Encerrar encontro">✕</button>
       </div>
     </section>
 

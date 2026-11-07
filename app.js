@@ -292,6 +292,7 @@ function initializeExperience() {
 
     scene.add(anchor);
     placedRoot = anchor;
+    xrHud.classList.add("is-placed");
     document.querySelectorAll('[data-encounter]').forEach(button => { button.disabled = false; });
     placedMixer = new THREE.AnimationMixer(model);
     const action = placedMixer.clipAction(animationClip);
@@ -446,6 +447,8 @@ function initializeExperience() {
     xrSession = null;
     placedMixer = null;
     placedRoot = null;
+    xrHud.classList.remove("is-placed");
+    xrHud.querySelector("details").open = false;
     document.querySelectorAll('[data-encounter]').forEach(button => { button.disabled = true; });
     encounterIsActive = false;
     lastFrameTime = 0;
