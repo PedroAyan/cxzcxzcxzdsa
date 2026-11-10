@@ -1,6 +1,6 @@
 export const QUIZ_INTRO = 'parabens gatinha';
 export const QUIZ_DESCRIPTION = 'quiz para saber se vc merece algo';
-export const GIFT_MESSAGE = 'voce foi bem camila oque vc quer de presente';
+export const GIFT_MESSAGE = 'parabens meu amor voce acertou todas\npode abrir o valorant';
 
 export const QUESTIONS = [
   {

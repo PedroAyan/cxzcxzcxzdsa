@@ -1,6 +1,6 @@
 import { createOrientationEncounter } from './orientation.js?v=quiz-9';
 import { CHARACTERS, placeBirthday } from './birthday.js?v=quiz-9';
-import { QUIZ_INTRO, QUIZ_DESCRIPTION, GIFT_MESSAGE, QUESTIONS, createQuiz } from './quiz.js?v=quiz-9';
+import { QUIZ_INTRO, QUIZ_DESCRIPTION, GIFT_MESSAGE, QUESTIONS, createQuiz } from './quiz.js?v=quiz-10';
 
 const OBJETO = {
   id: "mew",

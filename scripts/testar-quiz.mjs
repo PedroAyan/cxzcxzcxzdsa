@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { QUESTIONS, GIFT_MESSAGE, QUIZ_INTRO, QUIZ_DESCRIPTION, createQuiz } from '../quiz.js';
 assert.equal(QUIZ_INTRO,'parabens gatinha');assert.equal(QUIZ_DESCRIPTION,'quiz para saber se vc merece algo');
-assert.equal(GIFT_MESSAGE,'voce foi bem camila oque vc quer de presente');
+assert.equal(GIFT_MESSAGE,'parabens meu amor voce acertou todas\npode abrir o valorant');
 assert.deepEqual(QUESTIONS.map(q=>q.options[q.correct]),[
   'vai se fuder pedro','se mata porra','vou te dar para os bodes','fodase boa noite  😡😡😡😡',
 ]);
