@@ -79,4 +79,4 @@ encounter.root.children.forEach((node, i) => assert.deepEqual(node.position, anc
 runtime.animationPaused = true; encounter.update(1);
 assert.deepEqual(vertices(encounter.root), animated, 'Pausa congela todos os modelos');
 encounter.dispose(); encounter.dispose(); assert.equal(scene.children.length, 0);
-console.log('OK: oito modelos deformam no GLTFLoader real; ciclos contínuos, pés fixos, movimento reduzido, instâncias animadas e pausa conjunta.');
+console.log('OK: sete modelos deformam no GLTFLoader real; ciclos contínuos, pés fixos, movimento reduzido, instâncias animadas e pausa conjunta.');

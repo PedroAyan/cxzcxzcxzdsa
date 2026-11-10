@@ -1,5 +1,5 @@
 import { createOrientationEncounter } from './orientation.js?v=frente-7';
-import { CHARACTERS, FINAL_MESSAGE, FINAL_NOTE, placeBirthday } from './birthday.js?v=frente-7';
+import { CHARACTERS, FINAL_MESSAGE, FINAL_NOTE, placeBirthday } from './birthday.js?v=sete-8';
 
 const OBJETO = {
   id: "mew",
@@ -136,11 +136,11 @@ function initializeExperience() {
     if (!surfaceMode) {
       const supported = window.isSecureContext && navigator.mediaDevices?.getUserMedia && 'DeviceOrientationEvent' in window;
       arButton.disabled = !supported || (!webxrReady && !webxrLoadError);
-      arButton.textContent = webxrReady ? 'Iniciar surpresa em RA' : webxrLoadError ? 'Tentar carregar novamente' : 'Preparando os oito modelos…';
+      arButton.textContent = webxrReady ? 'Iniciar surpresa em RA' : webxrLoadError ? 'Tentar carregar novamente' : `Preparando ${CHARACTERS.length} personagens…`;
       manualArButton.hidden = !externalArAvailable;
       setArNote(!supported ? 'Câmera e orientação indisponíveis. Abra em HTTPS no Safari ou Chrome do celular.'
         : webxrLoadError ? 'Não foi possível carregar o encontro. Confira a conexão e recarregue a página.'
-        : 'Procure os oito itens à frente e nas laterais; dois ficam mais baixos na frente. Sua caminhada não é rastreada.', !supported || Boolean(webxrLoadError));
+        : `Procure os ${CHARACTERS.length} personagens à frente e nas laterais; dois ficam mais baixos na frente. Sua caminhada não é rastreada.`, !supported || Boolean(webxrLoadError));
       return;
     }
 

@@ -1,12 +1,11 @@
 export const CHARACTERS = [
-  { id: 'mew', name: 'Mew', path: 'models/mew.glb', size: 0.45 },
-  { id: 'melody', name: 'My Melody', path: 'models/aniversario/melody.glb', size: 0.5 },
-  { id: 'piano', name: 'My Sweet Piano', path: 'models/aniversario/piano.glb', size: 0.5 },
-  { id: 'rick', name: 'Rick Sanchez', path: 'models/aniversario/rick.glb', size: 0.7 },
-  { id: 'coraline', name: 'Coraline', path: 'models/aniversario/coraline.glb', size: 0.65 },
-  { id: 'sakura', name: 'Flor de sakura', path: 'models/aniversario/sakura.glb', size: 0.5 },
-  { id: 'sylveon', name: 'Sylveon', path: 'models/aniversario/sylveon.glb', size: 0.6 },
-  { id: 'umbreon', name: 'Umbreon', path: 'models/aniversario/umbreon.glb', size: 0.6 },
+  { id: 'mew', name: 'Mew', path: 'models/mew.glb', size: 0.36 },
+  { id: 'melody', name: 'My Melody', path: 'models/aniversario/melody.glb', size: 0.4 },
+  { id: 'piano', name: 'My Sweet Piano', path: 'models/aniversario/piano.glb', size: 0.4 },
+  { id: 'rick', name: 'Rick Sanchez', path: 'models/aniversario/rick.glb', size: 0.56 },
+  { id: 'coraline', name: 'Coraline', path: 'models/aniversario/coraline.glb', size: 0.52 },
+  { id: 'sylveon', name: 'Sylveon', path: 'models/aniversario/sylveon.glb', size: 0.48 },
+  { id: 'umbreon', name: 'Umbreon', path: 'models/aniversario/umbreon.glb', size: 0.48 },
 ];
 
 const MESSAGE_DISTANCE = 1.05;
@@ -30,7 +29,7 @@ function fitBirthdayMessage(message, camera) {
     viewHeight * 0.64 / message.userData.baseHeight));
 }
 
-// Seis posições no arco frontal e duas mais baixas na frente. Nunca atrás
+// Cinco posições no arco frontal e duas mais baixas na frente. Nunca atrás
 // da direção inicial; sorteia apenas quem ocupa cada posição.
 export function arrangeCharacters(items, random = Math.random) {
   const shuffled = [...items];
@@ -44,9 +43,9 @@ export function arrangeCharacters(items, random = Math.random) {
     const lower = i >= upperCount;
     const index = lower ? i - upperCount : i;
     const count = lower ? lowerCount : upperCount;
-    const halfArc = (lower ? 18 : 70) * Math.PI / 180;
+    const halfArc = (lower ? 14 : 45) * Math.PI / 180;
     const angle = (count > 1 ? -halfArc + index * 2 * halfArc / (count - 1) : 0) + (random() - 0.5) * 0.04;
-    return { item, angle, height: lower ? -1.2 : -0.45, distance: lower ? 1.9 : 1.7 };
+    return { item, angle, height: lower ? -1.2 : -0.45, distance: lower ? 2.8 : 2.6 };
   });
 }
 

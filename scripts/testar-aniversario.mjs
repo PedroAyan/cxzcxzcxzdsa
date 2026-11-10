@@ -10,6 +10,8 @@ import { TextGeometry } from '../.cache/ra-assets/node_modules/three/examples/js
 const io = new NodeIO().registerExtensions(ALL_EXTENSIONS);
 const preparation = JSON.parse(await readFile(new URL('../models/aniversario/preparacao.json', import.meta.url), 'utf8'));
 const report = [];
+assert.equal(CHARACTERS.length,7,'O encontro exige somente os sete personagens');
+assert.ok(!CHARACTERS.some(item=>item.id==='sakura'),'A flor não participa da descoberta');
 for (const item of CHARACTERS) {
   const bytes = await readFile(new URL('../' + item.path, import.meta.url));
   const doc = await io.readBinary(bytes);
@@ -54,7 +56,7 @@ for (let n = 0; n < 100; n++) {
   assert.equal(layout.filter(p=>p.height<-.8).length,2,'Dois itens mais baixos na frente');
   for(const height of new Set(layout.map(p=>p.height))){
     const row=layout.filter(p=>p.height===height).sort((a,b)=>a.angle-b.angle);
-    for(let i=1;i<row.length;i++)assert.ok(row[i].angle-row[i-1].angle>0.4,'Itens da mesma altura ficam separados');
+    for(let i=1;i<row.length;i++)assert.ok(row[i].angle-row[i-1].angle>0.3,'Itens da mesma altura ficam separados');
   }
 }
 const scene = new THREE.Scene();
@@ -71,11 +73,13 @@ for (let n = 0; n < 3; n++) {
   assert.equal(encounter.root.children.length, CHARACTERS.length);
   for (const anchor of encounter.root.children) {
     assert.ok(anchor.position.dot(forward)>0,'Fica à frente qualquer que seja a direção inicial');
-    assert.ok(Math.hypot(anchor.position.x,anchor.position.z)>=1.5&&Math.hypot(anchor.position.x,anchor.position.z)<=2.1);
+    const distance=Math.hypot(anchor.position.x,anchor.position.z);
+    assert.ok(distance>=2.4&&distance<=3,'Personagens ficam mais distantes');
     anchor.updateMatrixWorld(true);
     const bounds = new THREE.Box3().setFromObject(anchor);
     assert.ok(Math.abs(bounds.min.y-anchor.position.y)<1e-5);
     assert.ok(bounds.getSize(new THREE.Vector3()).length() < 1);
+    assert.ok(bounds.getSize(new THREE.Vector3()).length()/distance<0.26,'O modelo ocupa uma parte menor do campo de visão');
   }
   encounter.dispose();
   encounter.dispose();
@@ -114,5 +118,5 @@ assert.equal(greeting.root.children.length,CHARACTERS.length+1,'Mensagem não se
 let disposed=0;text.children[0].geometry.addEventListener('dispose',()=>disposed++);
 greeting.dispose();assert.equal(disposed,1);assert.equal(scene.children.length,0);
 console.log('OK: mensagem rosa para Camila, recado completo, fundo transparente, revelação única, posição fixa e descarte.');
-console.log('OK: oito GLB, texturas embutidas, 100 sorteios sem sobreposição, escala, ponto de apoio e limpeza em três encontros.');
+console.log('OK: sete GLB sem a flor, texturas, 100 sorteios sem sobreposição, modelos menores e mais distantes, apoio e limpeza.');
 console.log('OK: animações embutidas, ciclos contínuos, movimento reduzido, pés fixos, originais preservados, My Melody sem chão verde e texto em cinco formatos de tela.');

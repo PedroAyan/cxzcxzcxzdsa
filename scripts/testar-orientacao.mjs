@@ -60,7 +60,7 @@ assert.ok(completionCamera,'A conclusão é disparada durante a busca frontal');
 completionCamera.updateMatrixWorld(true);
 birthday.root.userData.characters.forEach((child,i)=>assert.deepEqual(child.position,positions[i]));
 const message = birthday.root.children.find(child => child.name === 'Mensagem para Camila 3D');
-assert.ok(message, 'Concluir os oito cria as letras reais, além de atualizar o status');
+assert.ok(message, 'Concluir os sete cria as letras reais, além de atualizar o status');
 message.updateMatrixWorld(true);
 for (const line of message.children) {
   const box = line.geometry.boundingBox;
@@ -102,7 +102,7 @@ try {
     const alpha=Math.atan2(-anchor.position.x,-anchor.position.z)*180/Math.PI;
     for(let step=0;step<2;step++){clock+=1000;listener({alpha,beta:65,gamma:0});loop(clock);}
   }
-  assert.equal(slowBirthday.root.userData.found.size,CHARACTERS.length,'Descobre os oito mesmo a 1 FPS');
+  assert.equal(slowBirthday.root.userData.found.size,CHARACTERS.length,'Descobre os sete mesmo a 1 FPS');
   assert.deepEqual(updates.at(-1),[CHARACTERS.length,CHARACTERS.length]);
   assert.equal(completions,1,'Leitura abre uma única vez, mesmo se as letras 3D falharem');
   assert.equal(warnings.length,1,'Falha 3D foi isolada');
@@ -115,5 +115,5 @@ assert.equal(slowRuntime.scene.children.length,0);
 globalThis.DeviceOrientationEvent.requestPermission=async()=> 'denied';
 let denial='';const denied=createOrientationEncounter({runtime,video,status(){},place(){},tick(){},end(message){denial=message;}});
 await denied.start();assert.match(denial,/Permita movimento/);denied.stop();
-console.log('OK: oito descobertas, letras reais inteiras ao concluir com celular inclinado, posição fixa, sensores interrompidos e permissão negada.');
-console.log('OK: descoberta a 1 FPS, progresso de 0 a 8 e conclusão única independente de falha no texto 3D.');
+console.log('OK: sete descobertas, letras reais inteiras ao concluir com celular inclinado, posição fixa, sensores interrompidos e permissão negada.');
+console.log('OK: descoberta a 1 FPS, progresso de 0 a 7 e conclusão única independente de falha no texto 3D.');
