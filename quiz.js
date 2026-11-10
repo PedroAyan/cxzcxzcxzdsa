@@ -24,7 +24,14 @@ export const QUESTIONS = [
   {
     id: 'dormir',
     text: 'oq falar quando estou indo dormir para o pedro',
-    options: ['te amo', 'MWWAAAAAAAAAC', 'fodase boa noite  😡😡😡😡', 'MWAAAAAAAAAAAAAAAAAAAAAAAAAAAAC'],
+    options: [
+      'te amo',
+      'MWWAAAAAAAAAC',
+      'fodase boa noite  😡😡😡😡',
+      'MWAAAAAAAAAAAAAAAAAAAAAAAAAAAAC',
+      'boa noite meu amor',
+      'MWWWWWWWWWAAAAAAAAC 💕💕',
+    ],
     correct: 2,
   },
 ];

@@ -1,6 +1,6 @@
 import { createOrientationEncounter } from './orientation.js?v=quiz-9';
 import { CHARACTERS, placeBirthday } from './birthday.js?v=coracoes-11';
-import { QUIZ_INTRO, QUIZ_DESCRIPTION, GIFT_MESSAGE, QUESTIONS, createQuiz } from './quiz.js?v=quiz-10';
+import { QUIZ_INTRO, QUIZ_DESCRIPTION, GIFT_MESSAGE, QUESTIONS, createQuiz } from './quiz.js?v=opcoes-12';
 import { createHeartConfetti } from './confetti.js?v=coracoes-11';
 
 const OBJETO = {
