@@ -9,7 +9,7 @@ export const CHARACTERS = [
   { id: 'umbreon', name: 'Umbreon', path: 'models/aniversario/umbreon.glb', size: 0.6 },
 ];
 
-const MESSAGE_DISTANCE = 1.45;
+const MESSAGE_DISTANCE = 1.05;
 export const FINAL_MESSAGE = [
   'vc eh mt especial camila,',
   'sempre q vc precisar de alguem',
@@ -86,16 +86,18 @@ export function placeBirthday(runtime, templates, forward) {
   root.userData.found = new Set();
   let message = null;
   root.userData.revealMessage = camera => {
-    if (message || !runtime.birthdayFont || !runtime.TextGeometry) return;
+    if (message) return message;
+    if (!runtime.birthdayFont || !runtime.TextGeometry) return null;
     message = createBirthdayMessage(runtime);
+    // Captura a pose completa uma única vez. Nivelar a direção escondia as
+    // letras quando o último personagem era encontrado com o celular inclinado.
+    camera.updateWorldMatrix(true, false);
     const direction = camera.getWorldDirection(new THREE.Vector3());
-    direction.y = 0;
-    if (direction.lengthSq() < 0.04) direction.copy(forward);
-    message.position.copy(direction.normalize().multiplyScalar(MESSAGE_DISTANCE));
-    message.position.y = 0.04;
-    message.rotation.y = Math.atan2(-message.position.x, -message.position.z);
+    camera.getWorldPosition(message.position).addScaledVector(direction, MESSAGE_DISTANCE);
+    camera.getWorldQuaternion(message.quaternion);
     fitBirthdayMessage(message, camera);
     root.add(message);
+    return message;
   };
   runtime.scene.add(root);
   let disposed = false;

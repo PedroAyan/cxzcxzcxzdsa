@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#edf4ed">
     <meta name="description" content="Encontre Mew e outros sete personagens em uma surpresa de aniversário em realidade aumentada.">
     <title>Mew — Mundo de bolso</title>
-    <link rel="stylesheet" href="./styles.css?v=aniversario-2">
+    <link rel="stylesheet" href="./styles.css?v=mew-1">
     <script type="importmap">
       {
         "imports": {
@@ -15,7 +15,7 @@
         }
       }
     </script>
-    <script type="module" src="./app.js?v=camila-2"></script>
+    <script type="module" src="./app.js?v=mew-camila-4"></script>
   </head>
   <body>
     <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -75,11 +75,7 @@
         </div>
 
         <div class="object-column">
-          <p class="object-kicker"><span class="kicker-dot" aria-hidden="true"></span> Objeto do QR code</p>
           <h1 id="nome-objeto">Mew</h1>
-          <p id="descricao-objeto" class="object-description">Uma pequena criatura de olhos azuis e cauda comprida.</p>
-          <p class="object-hint">Uma surpresa de aniversário: Mew, My Melody, My Sweet Piano, Rick, Coraline, Sylveon, Umbreon e uma flor de sakura estão ao seu redor. Gire o celular para encontrar os oito! As direções mudam a cada encontro. Este modo não rastreia sua caminhada nem reconhece o chão.</p>
-
           <div class="actions">
             <button id="botao-ra" class="button button-primary" type="button" disabled>
               Preparando encontro…
@@ -87,10 +83,7 @@
             <a class="button button-secondary" href="#palco">Explorar em 3D</a>
           </div>
           <button id="botao-ra-manual" class="button button-secondary manual-ar-button" type="button" hidden>Alternativa: somente Mew na RA do aparelho</button>
-          <p id="aviso-ra" class="ar-note" role="status" aria-live="polite">
-            A câmera só será solicitada depois que você iniciar a experiência.
-          </p>
-          <p class="ar-note">No iPhone, abra pelo Safari e permita câmera e movimento. O encontro abre nesta página. A alternativa “RA manual do aparelho” usa outro modo e continua exigindo reconhecer uma superfície.</p>
+          <p id="aviso-ra" class="ar-note" role="status" aria-live="polite" hidden></p>
         </div>
       </section>
 

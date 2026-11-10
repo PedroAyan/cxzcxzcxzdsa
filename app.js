@@ -1,10 +1,9 @@
-import { createOrientationEncounter } from './orientation.js?v=camila-1';
-import { CHARACTERS, placeBirthday } from './birthday.js?v=camila-2';
+import { createOrientationEncounter } from './orientation.js?v=camila-3';
+import { CHARACTERS, placeBirthday } from './birthday.js?v=camila-4';
 
 const OBJETO = {
   id: "mew",
   nome: "Mew",
-  descricao: "Uma pequena criatura de olhos azuis e cauda comprida.",
   glb: new URL("./models/mew.glb?v=mew-original-1", import.meta.url).href,
   usdz: new URL("./models/mew.usdz?v=mew-original-1", import.meta.url).href
 };
@@ -52,7 +51,6 @@ function initializeExperience() {
   objectUrl.searchParams.set("obj", OBJETO.id);
 
   document.querySelector("#nome-objeto").textContent = OBJETO.nome;
-  document.querySelector("#descricao-objeto").textContent = OBJETO.descricao;
   document.title = `${OBJETO.nome} — Mundo de bolso`;
   objectLink.textContent = objectUrl.toString();
   viewer.setAttribute("src", OBJETO.glb);
@@ -83,15 +81,11 @@ function initializeExperience() {
   let birthday = null;
   let birthdayTemplates = [];
   const surfaceMode = params.get('modo') === 'superficie';
-  if (!surfaceMode) {
-    document.querySelector('#nome-objeto').textContent = 'Sua surpresa';
-    document.querySelector('#descricao-objeto').textContent = 'Oito encontros para um aniversário especial.';
-    document.title = 'Surpresa de aniversário — Mundo de bolso';
-  }
 
   function setArNote(message, isError = false) {
     arNote.textContent = message;
     arNote.classList.toggle("is-error", isError);
+    arNote.hidden = !isError;
   }
 
   function setViewerCaption(message) {
@@ -119,7 +113,7 @@ function initializeExperience() {
       manualArButton.hidden = !externalArAvailable;
       setArNote(!supported ? 'Câmera e orientação indisponíveis. Abra em HTTPS no Safari ou Chrome do celular.'
         : webxrLoadError ? 'Não foi possível carregar o encontro. Confira a conexão e recarregue a página.'
-        : 'Permita câmera e movimento e procure os oito itens ao redor. As posições são sorteadas em cada encontro; sua caminhada não é rastreada.');
+        : 'Permita câmera e movimento e procure os oito itens ao redor. As posições são sorteadas em cada encontro; sua caminhada não é rastreada.', !supported || Boolean(webxrLoadError));
       return;
     }
 
@@ -147,7 +141,7 @@ function initializeExperience() {
     } else if (externalArAvailable) {
       setArNote("Este navegador não oferece o encontro WebXR automático. A alternativa abre o visualizador do aparelho: você posiciona Mew com um toque e o visualizador controla a câmera. No iPhone, o USDZ inclui a animação, mas essa opção não equivale ao encontro automático.");
     } else {
-      setArNote("Este navegador ou aparelho não oferece WebXR de superfície nem um visualizador de RA compatível. Use a prévia 3D; ela não é um encontro ancorado.");
+      setArNote("Este navegador ou aparelho não oferece WebXR de superfície nem um visualizador de RA compatível. Use a prévia 3D; ela não é um encontro ancorado.", true);
     }
   }
 
