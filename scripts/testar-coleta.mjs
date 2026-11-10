@@ -22,7 +22,7 @@ function face(anchor){clock+=1000;listener({alpha:Math.atan2(-anchor.position.x,
 await encounter.start();listener({alpha:0,beta:80,gamma:0});loop(clock);
 const saved=birthday.root.userData.characters.map(anchor=>anchor.position.clone());
 for(const anchor of birthday.root.userData.characters){face(anchor);clock+=1000;loop(clock);}
-assert.equal(birthday.root.userData.collected.size,0,'Só olhar para os sete não coleta automaticamente');
+assert.equal(birthday.root.userData.collected.size,0,'Só olhar para os personagens não coleta automaticamente');
 assert.equal(completed,0,'O quiz não abre antes dos cliques');
 clock+=3000;loop(clock);
 const rect={left:20,top:35,width:414,height:749};
@@ -39,11 +39,11 @@ for(const [i,anchor] of birthday.root.userData.characters.entries()){
   assert.equal(birthday.collectCharacter(anchor),null,'Não coleta o mesmo personagem duas vezes');
   assert.deepEqual(anchor.position,saved[i],'Os outros pontos continuam fixos');
 }
-assert.deepEqual(latestProgress,[7,7]);assert.equal(completed,1);
+assert.deepEqual(latestProgress,[CHARACTERS.length,CHARACTERS.length]);assert.equal(completed,1);
 clock+=1000;loop(clock);assert.equal(completed,1,'Conclusão dispara uma única vez');
 assert.equal(encounter.collectSelected(),null,'Não há coleta adicional após completar');
 encounter.stop();birthday.dispose();assert.equal(stopped,1);assert.equal(scene.children.length,0);
 assert.equal(encounter.collectAt(200,300,rect),null,'Não coleta após encerrar');
 const fresh=placeBirthday(runtime,templates,new THREE.Vector3(0,0,-1));
-assert.equal(fresh.root.userData.collected.size,0);assert.ok(fresh.root.children.every(c=>c.visible),'Novo encontro restaura os sete');fresh.dispose();
+assert.equal(fresh.root.userData.collected.size,0);assert.ok(fresh.root.children.every(c=>c.visible),'Novo encontro restaura os personagens');fresh.dispose();
 console.log('OK: coleta por raycast, nenhum recolhimento automático, remoção imediata, contagem sem duplicação, conclusão única e reinício.');

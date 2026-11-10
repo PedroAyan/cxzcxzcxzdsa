@@ -5,10 +5,9 @@ export const CHARACTERS = [
   { id: 'rick', name: 'Rick Sanchez', path: 'models/aniversario/rick.glb', size: 0.56 },
   { id: 'coraline', name: 'Coraline', path: 'models/aniversario/coraline.glb', size: 0.52 },
   { id: 'sylveon', name: 'Sylveon', path: 'models/aniversario/sylveon.glb', size: 0.48 },
-  { id: 'umbreon', name: 'Umbreon', path: 'models/aniversario/umbreon.glb', size: 0.48 },
 ];
 
-// Cinco posições no arco frontal e duas mais baixas na frente. Nunca atrás
+// Posições no arco frontal e duas mais baixas na frente. Nunca atrás
 // da direção inicial; sorteia apenas quem ocupa cada posição.
 export function arrangeCharacters(items, random = Math.random) {
   const shuffled = [...items];

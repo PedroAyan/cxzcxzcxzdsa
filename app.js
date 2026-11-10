@@ -1,6 +1,7 @@
 import { createOrientationEncounter } from './orientation.js?v=quiz-9';
-import { CHARACTERS, placeBirthday } from './birthday.js?v=quiz-9';
+import { CHARACTERS, placeBirthday } from './birthday.js?v=coracoes-11';
 import { QUIZ_INTRO, QUIZ_DESCRIPTION, GIFT_MESSAGE, QUESTIONS, createQuiz } from './quiz.js?v=quiz-10';
+import { createHeartConfetti } from './confetti.js?v=coracoes-11';
 
 const OBJETO = {
   id: "mew",
@@ -94,6 +95,8 @@ function initializeExperience() {
   let birthdayTemplates = [];
   const surfaceMode = params.get('modo') === 'superficie';
   const quiz = createQuiz();
+  const heartConfetti = createHeartConfetti(document.querySelector('#xr-confetti'));
+  let celebrated = false;
 
   function renderQuiz() {
     const state = quiz.getState(), isQuestion = state.stage === 'question';
@@ -123,6 +126,10 @@ function initializeExperience() {
     }
     xrQuiz.scrollTop = 0;
     quizTitle.focus({ preventScroll: true });
+    if (state.passed && !celebrated) {
+      celebrated = true;
+      heartConfetti.burst();
+    }
   }
 
   function showQuiz() {
@@ -513,6 +520,8 @@ function initializeExperience() {
   }
 
   function cleanUpXrSession() {
+    heartConfetti.clear();
+    celebrated = false;
     xrQuiz.hidden = true;
     xrCollectButton.hidden = true;
     quiz.reset();

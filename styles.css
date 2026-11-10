@@ -598,6 +598,21 @@ body.xr-active { overscroll-behavior: none; }
   text-shadow: 0 1px 4px #000, 0 0 12px #000;
 }
 
+.xr-confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+.xr-confetti-heart {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  opacity: 0;
+}
+
 .xr-quiz {
   position: absolute;
   top: 50%;

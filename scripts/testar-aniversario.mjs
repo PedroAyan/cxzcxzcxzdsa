@@ -8,8 +8,9 @@ import { ALL_EXTENSIONS } from '../.cache/ra-assets/node_modules/@gltf-transform
 const io = new NodeIO().registerExtensions(ALL_EXTENSIONS);
 const preparation = JSON.parse(await readFile(new URL('../models/aniversario/preparacao.json', import.meta.url), 'utf8'));
 const report = [];
-assert.equal(CHARACTERS.length,7,'O encontro exige somente os sete personagens');
+assert.equal(CHARACTERS.length,6,'O encontro exige somente os seis personagens');
 assert.ok(!CHARACTERS.some(item=>item.id==='sakura'),'A flor não participa da descoberta');
+assert.ok(!CHARACTERS.some(item=>item.id==='umbreon'),'Umbreon não participa da coleta');
 for (const item of CHARACTERS) {
   const bytes = await readFile(new URL('../' + item.path, import.meta.url));
   const doc = await io.readBinary(bytes);
@@ -84,4 +85,4 @@ for (let n = 0; n < 3; n++) {
   assert.equal(scene.children.length, 0, 'Nenhum convidado duplicado após reiniciar');
 }
 await writeFile(new URL('../modelos-aniversario/verificacao-integracao.json', import.meta.url), JSON.stringify(report, null, 2));
-console.log('OK: sete GLB sem flor, animações e texturas, 100 sorteios frontais, escala menor, distância, apoio e limpeza.');
+console.log('OK: seis GLB sem flor nem Umbreon, animações e texturas, 100 sorteios frontais, escala menor, distância, apoio e limpeza.');

@@ -91,6 +91,6 @@ for(const anchor of encounter.root.userData.characters){
   assert.equal(hit,anchor,`${anchor.userData.name}: modelo real animado responde ao toque`);
   assert.equal(encounter.collectCharacter(hit),anchor);assert.equal(anchor.visible,false);
 }
-assert.equal(encounter.root.userData.collected.size,7);
+assert.equal(encounter.root.userData.collected.size,CHARACTERS.length);
 encounter.dispose(); encounter.dispose(); assert.equal(scene.children.length, 0);
-console.log('OK: sete GLB reais animados respondem ao raycast; ciclos, pés, movimento reduzido, instâncias e pausa preservados.');
+console.log('OK: seis GLB reais animados respondem ao raycast; ciclos, pés, movimento reduzido, instâncias e pausa preservados.');
