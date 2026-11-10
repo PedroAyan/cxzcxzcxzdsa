@@ -87,6 +87,8 @@ const text = greeting.root.children.at(-1);
 assert.equal(text.name,'Mensagem para Camila 3D');
 assert.deepEqual(text.children.map(child=>child.name), [...FINAL_MESSAGE,...FINAL_NOTE].filter(Boolean), 'Texto completo e nenhum fundo');
 assert.ok(text.children.every(child=>child.material[0].color.getHex()===0xffa9d3), 'Fonte rosa');
+greeting.setMessageVisible(false);assert.equal(text.visible,false,'Oculta cópia 3D durante a leitura na tela');
+greeting.setMessageVisible(true);assert.equal(text.visible,true,'Retoma a mensagem 3D ao voltar aos personagens');
 text.updateMatrixWorld(true);
 const bounds = new THREE.Box3().setFromObject(text);
 assert.ok(bounds.getSize(new THREE.Vector3()).z > 0.005, 'Letras têm volume real');

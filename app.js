@@ -1,5 +1,5 @@
-import { createOrientationEncounter } from './orientation.js?v=camila-3';
-import { CHARACTERS, placeBirthday } from './birthday.js?v=camila-5';
+import { createOrientationEncounter } from './orientation.js?v=frase-6';
+import { CHARACTERS, FINAL_MESSAGE, FINAL_NOTE, placeBirthday } from './birthday.js?v=frase-6';
 
 const OBJETO = {
   id: "mew",
@@ -29,6 +29,10 @@ const xrStatus = document.querySelector("#xr-estado");
 const xrHint = document.querySelector("#xr-dica");
 const xrPauseButton = document.querySelector("#xr-pausar");
 const xrEndButton = document.querySelector("#xr-encerrar");
+const xrProgress = document.querySelector('#xr-progresso');
+const xrFinalMessage = document.querySelector('#xr-frase');
+const xrReadMessage = document.querySelector('#xr-ler-frase');
+const xrCloseMessage = document.querySelector('#xr-frase-fechar');
 
 const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 const requestedId = params.get("obj");
@@ -81,6 +85,29 @@ function initializeExperience() {
   let birthday = null;
   let birthdayTemplates = [];
   const surfaceMode = params.get('modo') === 'superficie';
+
+  document.querySelector('#xr-frase-titulo').textContent = FINAL_MESSAGE.join(' ');
+  const noteParagraphs = FINAL_NOTE.join('\n').split('\n\n').map(text => {
+    const paragraph = document.createElement('p');
+    paragraph.textContent = text.replaceAll('\n', ' ');
+    return paragraph;
+  });
+  document.querySelector('#xr-frase-recado').replaceChildren(...noteParagraphs);
+
+  function showFinalMessage() {
+    if (!birthday || birthday.root.userData.found.size !== birthday.root.userData.characters.length) return;
+    birthday.setMessageVisible(false);
+    xrReadMessage.hidden = false;
+    xrFinalMessage.hidden = false;
+    xrHud.querySelector('details').open = false;
+    xrCloseMessage.focus({ preventScroll: true });
+  }
+
+  function updateDiscoveryProgress(found, total) {
+    const label = `${found} de ${total} encontrados`;
+    if (xrProgress.textContent !== label) xrProgress.textContent = label;
+    xrProgress.hidden = false;
+  }
 
   function setArNote(message, isError = false) {
     arNote.textContent = message;
@@ -188,7 +215,7 @@ function initializeExperience() {
       ]);
 
       const loader = new GLTFLoader();
-      const birthdayFont = surfaceMode ? null : await new FontLoader().loadAsync(new URL('./models/fonts/helvetiker_bold.typeface.json', import.meta.url).href);
+      const birthdayFont = surfaceMode ? null : await new FontLoader().loadAsync(new URL('./models/fonts/helvetiker_bold.typeface.json', import.meta.url).href).catch(() => null);
       const entries = surfaceMode ? [CHARACTERS[0]] : CHARACTERS;
       const loaded = await Promise.allSettled(entries.map(async item => {
         const gltf = await loader.loadAsync(new URL(item.path, import.meta.url).href);
@@ -453,6 +480,9 @@ function initializeExperience() {
   }
 
   function cleanUpXrSession() {
+    xrFinalMessage.hidden = true;
+    xrReadMessage.hidden = true;
+    xrProgress.hidden = true;
     orientationEncounter?.stop();
     orientationEncounter = null;
     if (birthday) {
@@ -665,6 +695,8 @@ function initializeExperience() {
           return placedRoot;
         },
         tick: delta => { if (!arRuntime.animationPaused) birthday?.update(delta); },
+        progress: updateDiscoveryProgress,
+        complete: showFinalMessage,
         end: message => { cleanUpXrSession(); setArNote(message, true); arButton.focus(); }
       });
       orientationEncounter.start();
@@ -677,6 +709,12 @@ function initializeExperience() {
   });
 
   manualArButton.addEventListener("click", openManualAr);
+  xrReadMessage.addEventListener('click', showFinalMessage);
+  xrCloseMessage.addEventListener('click', () => {
+    xrFinalMessage.hidden = true;
+    birthday?.setMessageVisible(true);
+    xrReadMessage.focus({ preventScroll: true });
+  });
 
   document.querySelectorAll('[data-preview]').forEach(button => {
     button.addEventListener('click', () => {

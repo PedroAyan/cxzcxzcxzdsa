@@ -3,8 +3,7 @@ import { readFile } from 'node:fs/promises';
 import * as THREE from '../.cache/ra-assets/node_modules/three/build/three.module.js';
 import { FontLoader } from '../.cache/ra-assets/node_modules/three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from '../.cache/ra-assets/node_modules/three/examples/jsm/geometries/TextGeometry.js';
-const source = await readFile(new URL('../orientation.js', import.meta.url), 'utf8');
-const {cameraQuaternion, createOrientationEncounter} = await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
+import {cameraQuaternion, createOrientationEncounter} from '../orientation.js';
 const initial = cameraQuaternion(THREE, {alpha:0,beta:90,gamma:0});
 const initialForward = new THREE.Vector3(0,0,-1).applyQuaternion(initial);
 assert.ok(initialForward.distanceTo(new THREE.Vector3(0,0,-1)) < 1e-6);
@@ -74,7 +73,44 @@ assert.ok(message.quaternion.equals(messageRotation));
 assert.equal(birthday.root.children.length,CHARACTERS.length+1, 'Conclusão não duplica a mensagem');
 clock+=3000;loop(clock);assert.equal(birthday.root.visible,false);
 multi.stop();birthday.dispose();assert.equal(multiRuntime.scene.children.length,0);
+
+// A contagem deve usar o tempo real, mesmo com apenas um quadro por segundo.
+let slowBirthday, completions=0;
+const updates=[], warnings=[];
+const slowRuntime={...multiRuntime,scene:new THREE.Scene(),birthdayFont:null};
+const slow=createOrientationEncounter({runtime:slowRuntime,video,status(){},tick(){},
+  place(_t,_v,forward){
+    slowBirthday=placeBirthday(slowRuntime,templates,forward);
+    slowBirthday.root.userData.revealMessage=()=>{throw new Error('Falha 3D simulada');};
+    return slowBirthday.root;
+  },
+  progress(found,total){updates.push([found,total]);},
+  complete(){completions++;},end(message){throw Error(message);}
+});
+const originalWarn=console.warn;
+console.warn=(...args)=>warnings.push(args);
+try {
+  await slow.start();
+  clock+=1000;listener({alpha:0,beta:90,gamma:0});loop(clock);
+  clock+=3000;loop(clock);
+  clock+=1000;listener({alpha:0,beta:90,gamma:0});loop(clock);
+  assert.equal(slowBirthday.root.userData.found.size,0,'Tempo sem sensores não conta como descoberta');
+  for(const anchor of slowBirthday.root.userData.characters){
+    const alpha=Math.atan2(-anchor.position.x,-anchor.position.z)*180/Math.PI;
+    for(let step=0;step<2;step++){clock+=1000;listener({alpha,beta:65,gamma:0});loop(clock);}
+  }
+  assert.equal(slowBirthday.root.userData.found.size,CHARACTERS.length,'Descobre os oito mesmo a 1 FPS');
+  assert.deepEqual(updates.at(-1),[CHARACTERS.length,CHARACTERS.length]);
+  assert.equal(completions,1,'Leitura abre uma única vez, mesmo se as letras 3D falharem');
+  assert.equal(warnings.length,1,'Falha 3D foi isolada');
+  clock+=1000;listener({alpha:0,beta:90,gamma:0});loop(clock);
+  assert.equal(completions,1,'Virar a câmera não reabre a leitura após fechar');
+} finally {
+  console.warn=originalWarn;slow.stop();slowBirthday?.dispose();
+}
+assert.equal(slowRuntime.scene.children.length,0);
 globalThis.DeviceOrientationEvent.requestPermission=async()=> 'denied';
 let denial='';const denied=createOrientationEncounter({runtime,video,status(){},place(){},tick(){},end(message){denial=message;}});
 await denied.start();assert.match(denial,/Permita movimento/);denied.stop();
 console.log('OK: oito descobertas, letras reais inteiras ao concluir com celular inclinado, posição fixa, sensores interrompidos e permissão negada.');
+console.log('OK: descoberta a 1 FPS, progresso de 0 a 8 e conclusão única independente de falha no texto 3D.');

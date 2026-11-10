@@ -585,6 +585,50 @@ body.xr-active { overscroll-behavior: none; }
 .xr-settings-panel { position: absolute; bottom: 60px; left: 0; width: min(330px, calc(100vw - 40px)); padding: 14px; border-radius: 16px; background: rgb(248 251 246 / 96%); box-shadow: 0 6px 24px #0003; }
 .xr-hud > .xr-control-stop { position: absolute; right: 0; bottom: 0; pointer-events: auto; padding: 0; }
 
+.xr-progress {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-shadow: 0 1px 4px #000, 0 0 12px #000;
+}
+
+.xr-final-message {
+  position: absolute;
+  top: 50%;
+  left: max(20px, env(safe-area-inset-left));
+  right: max(20px, env(safe-area-inset-right));
+  transform: translateY(-50%);
+  max-height: calc(100dvh - 180px);
+  overflow-y: auto;
+  color: #ffa9d3;
+  text-align: center;
+  text-shadow: 0 2px 3px #000, 0 0 12px rgb(0 0 0 / 65%);
+  pointer-events: auto;
+  overscroll-behavior: contain;
+}
+
+.xr-final-message h2 {
+  margin: 0 auto 24px;
+  font: 800 clamp(22px, 6vw, 34px) / 1.2 system-ui, sans-serif;
+}
+
+.xr-final-message p {
+  max-width: 38ch;
+  margin: 0 auto 20px;
+  font-size: clamp(16px, 4.2vw, 20px);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.xr-final-message button { margin-top: 4px; text-shadow: none; }
+.xr-read-message { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); pointer-events: auto; }
+
 .xr-kicker {
   display: flex;
   align-items: center;

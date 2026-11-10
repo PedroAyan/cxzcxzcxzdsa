@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#edf4ed">
     <meta name="description" content="Encontre Mew e outros sete personagens em uma surpresa de aniversário em realidade aumentada.">
     <title>Mew — Mundo de bolso</title>
-    <link rel="stylesheet" href="./styles.css?v=mew-1">
+    <link rel="stylesheet" href="./styles.css?v=frase-6">
     <script type="importmap">
       {
         "imports": {
@@ -15,7 +15,7 @@
         }
       }
     </script>
-    <script type="module" src="./app.js?v=mew-camila-5"></script>
+    <script type="module" src="./app.js?v=frase-6"></script>
   </head>
   <body>
     <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -132,6 +132,12 @@
     <video id="camera-encontro" class="encounter-camera" muted autoplay playsinline aria-hidden="true" hidden></video>
     <canvas id="xr-canvas" class="xr-canvas" aria-hidden="true"></canvas>
     <section id="xr-overlay" class="xr-overlay" aria-label="Controles do encontro em realidade aumentada" hidden>
+      <p id="xr-progresso" class="xr-progress" role="status" aria-live="polite" hidden></p>
+      <section id="xr-frase" class="xr-final-message" aria-labelledby="xr-frase-titulo" hidden>
+        <h2 id="xr-frase-titulo"></h2>
+        <div id="xr-frase-recado"></div>
+        <button id="xr-frase-fechar" class="xr-control-button" type="button">Voltar aos personagens</button>
+      </section>
       <div class="xr-hud">
         <p id="xr-estado" class="xr-status" role="status" aria-live="polite">Preparando a câmera e o rastreamento…</p>
         <p id="xr-dica" class="xr-hint">Mova o celular devagar para encontrar uma superfície horizontal próxima.</p>
@@ -150,6 +156,7 @@
         </div>
           </div>
         </details>
+        <button id="xr-ler-frase" class="xr-control-button xr-read-message" type="button" hidden>Ler frase</button>
         <button id="xr-encerrar" class="xr-control-button xr-control-stop" type="button" aria-label="Encerrar encontro">✕</button>
       </div>
     </section>

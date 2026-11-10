@@ -2,7 +2,9 @@
 
 O modo principal contém oito itens, incluindo My Sweet Piano, fornecida na Área de Trabalho. Todos têm animação nos GLB de exibição; os sete novos derivados ficam em `models/aniversario/`, e os originais permanecem em `modelos-aniversario/`. A base verde da My Melody foi removida somente do derivado. `scripts/preparar-aniversario.mjs` reproduz os arquivos e registra hashes dos originais. Mantenha a animação dos personagens com o apoio dos pés e as posições virtuais fixas; ofereça pausa e use Idle suave quando houver preferência por movimento reduzido.
 
-A conclusão dos oito revela a mensagem para Camila definida em `FINAL_MESSAGE`, seguida de `FINAL_NOTE`, em `birthday.js`. Todas as letras são rosas, extrudadas, sem painel ou plano de fundo. Capturar a pose completa da câmera uma única vez na conclusão, incluindo a inclinação, para a mensagem aparecer inteira no campo de visão; depois manter sua posição e orientação fixas. A largura e a altura devem caber na tela, inclusive ao girar o aparelho. Esta atualização substitui o texto Feliz aniversário e o total de sete itens citados no histórico abaixo.
+A conclusão dos oito abre automaticamente a leitura de `FINAL_MESSAGE` e `FINAL_NOTE`, de `birthday.js`, diretamente na tela, em rosa e com fundo transparente. A leitura independe de sensores e das letras 3D, e pode ser reaberta pelo botão Ler frase. Voltar aos personagens fecha a leitura e permite explorar as letras extrudadas quando disponíveis. A cópia 3D permanece oculta durante a leitura para não duplicar o texto. A fonte 3D é opcional e sua falha não pode impedir a conclusão.
+
+No encontro, mostrar a contagem de itens encontrados. A descoberta exige 0,6 segundo real no enquadramento, sem usar o delta limitado das animações; interromper sensores zera o tempo parcial. Capturar a pose completa da câmera uma única vez para posicionar a cópia 3D, que depois permanece fixa.
 
 Na área principal, mostrar somente o título Mew e as opções. Manter os avisos de erro e incompatibilidade quando necessários; não reintroduzir os textos explicativos removidos dessa área.
 

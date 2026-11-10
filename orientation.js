@@ -7,10 +7,10 @@ export function cameraQuaternion(THREE, event, screenAngle = 0) {
     .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -screenAngle * radians));
 }
 
-export function createOrientationEncounter({ runtime, video, status, place, tick, end }) {
+export function createOrientationEncounter({ runtime, video, status, place, tick, end, progress, complete }) {
   const { THREE, camera, renderer, scene } = runtime;
   let active = false, stream = null, root = null, sensor = null;
-  let lastSensor = 0, previous = 0, timer = null;
+  let lastSensor = 0, previous = 0, timer = null, completed = false;
   const onSensor = (event) => {
     if (![event.alpha, event.beta, event.gamma].every(Number.isFinite)) return;
     sensor = { alpha: event.alpha, beta: event.beta, gamma: event.gamma };
@@ -56,6 +56,7 @@ export function createOrientationEncounter({ runtime, video, status, place, tick
         previous = now;
         if (!sensor || now - lastSensor > 2500) {
           if (root) root.visible = false;
+          root?.userData.characters?.forEach(character => { character.userData.viewStart = null; character.userData.viewTime = 0; });
           renderer.render(scene, camera);
           if (root) status('Aguardando os sensores.', 'Mova o celular devagar para recuperar a orientação.');
           return;
@@ -83,21 +84,31 @@ export function createOrientationEncounter({ runtime, video, status, place, tick
           const targets = root.userData.characters.map(character => {
             const relative = character.position.clone().add(new THREE.Vector3(0, character.userData.centerHeight * character.scale.y, 0)).applyMatrix4(camera.matrixWorldInverse);
             const projected = relative.clone().applyMatrix4(camera.projectionMatrix);
-            return { character, relative, projected, visible: relative.z < 0 && Math.abs(projected.x) < 0.8 && Math.abs(projected.y) < 0.85 };
+            return { character, relative, projected, visible: relative.z < 0 && Math.abs(projected.x) < 0.95 && Math.abs(projected.y) < 0.95 };
           });
           const visible = targets.filter(t => t.visible).sort((a, b) => Math.abs(a.projected.x) - Math.abs(b.projected.x));
           const found = root.userData.found;
           // Exige um breve enquadramento contínuo, para não contar uma passagem rápida.
           for (const target of targets) {
-            target.character.userData.viewTime = target.visible ? (target.character.userData.viewTime ?? 0) + delta : 0;
+            const data = target.character.userData;
+            if (!target.visible) data.viewStart = null;
+            else data.viewStart ??= now;
+            // O tempo de descoberta é real; o limite de delta é só da animação.
+            data.viewTime = target.visible ? (now - data.viewStart) / 1000 : 0;
             if (target.character.userData.viewTime >= 0.6) found.add(target.character.userData.id);
           }
+          progress?.(found.size, targets.length);
           root.userData.selected = visible[0]?.character ?? null;
           const next = targets.filter(t => !found.has(t.character.userData.id)).sort((a,b) => Math.abs(Math.atan2(a.relative.x, -a.relative.z)) - Math.abs(Math.atan2(b.relative.x, -b.relative.z)))[0];
-          const progress = `${found.size} de ${targets.length} encontrados`;
-          const hint = next ? (next.relative.z >= 0 ? 'Olhe para trás.' : Math.abs(next.projected.x) > 0.8 ? (next.relative.x < 0 ? 'Vire para a esquerda.' : 'Vire para a direita.') : next.relative.y < 0 ? 'Aponte um pouco para baixo.' : 'Aponte um pouco para cima.') : 'Você encontrou todos!';
-          if (found.size === targets.length) root.userData.revealMessage?.(camera);
-          status(found.size === targets.length ? 'Você encontrou todos!' : visible.length ? `Você encontrou ${visible[0].character.userData.name}!` : 'Sua surpresa está ao redor.', found.size === targets.length ? 'Sua mensagem 3D apareceu à sua frente. Gire o celular para explorar.' : `${progress} · ${hint}`);
+          const progressLabel = `${found.size} de ${targets.length} encontrados`;
+          const hint = next ? (next.visible ? 'Mantenha o personagem na tela por um instante.' : next.relative.z >= 0 ? 'Olhe para trás.' : Math.abs(next.projected.x) > 0.95 ? (next.relative.x < 0 ? 'Vire para a esquerda.' : 'Vire para a direita.') : next.relative.y < 0 ? 'Aponte um pouco para baixo.' : 'Aponte um pouco para cima.') : 'Você encontrou todos!';
+          if (found.size === targets.length && !completed) {
+            completed = true;
+            complete?.();
+            try { root.userData.revealMessage?.(camera); }
+            catch (error) { console.warn('Não foi possível criar as letras 3D; a frase continua disponível na tela.', error); }
+          }
+          status(found.size === targets.length ? 'Você encontrou todos!' : visible.length ? `Você encontrou ${visible[0].character.userData.name}!` : 'Sua surpresa está ao redor.', found.size === targets.length ? 'Sua frase está aberta. Use “Ler frase” para vê-la novamente.' : `${progressLabel} · ${hint}`);
           renderer.render(scene, camera);
           return;
         }

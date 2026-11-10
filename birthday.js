@@ -83,6 +83,7 @@ export function placeBirthday(runtime, templates, forward) {
   root.userData.characters = characters;
   root.userData.found = new Set();
   let message = null;
+  let messageVisible = true;
   root.userData.revealMessage = camera => {
     if (message) return message;
     if (!runtime.birthdayFont || !runtime.TextGeometry) return null;
@@ -94,6 +95,7 @@ export function placeBirthday(runtime, templates, forward) {
     camera.getWorldPosition(message.position).addScaledVector(direction, MESSAGE_DISTANCE);
     camera.getWorldQuaternion(message.quaternion);
     fitBirthdayMessage(message, camera);
+    message.visible = messageVisible;
     root.add(message);
     return message;
   };
@@ -103,6 +105,7 @@ export function placeBirthday(runtime, templates, forward) {
     root,
     update(delta) { if (!runtime.animationPaused) mixers.forEach(m => m.update(delta)); },
     resizeMessage(camera) { if (message) fitBirthdayMessage(message, camera); },
+    setMessageVisible(visible) { messageVisible = visible; if (message) message.visible = visible; },
     dispose() {
       if (disposed) return;
       disposed = true;
