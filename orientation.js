@@ -33,7 +33,7 @@ export function createOrientationEncounter({ runtime, video, status, place, tick
       // A permissão de sensores precisa ser pedida antes de qualquer await no gesto.
       const permission = typeof DeviceOrientationEvent.requestPermission === 'function'
         ? DeviceOrientationEvent.requestPermission() : Promise.resolve('granted');
-      if (await permission !== 'granted') throw new Error('Permita movimento e orientação para procurar Mew girando o celular.');
+      if (await permission !== 'granted') throw new Error('Permita movimento e orientação para procurar os personagens girando o celular.');
       if (!active) return;
       window.addEventListener('deviceorientation', onSensor);
       const requested = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' } } });
@@ -67,16 +67,40 @@ export function createOrientationEncounter({ runtime, video, status, place, tick
           forward.y = 0;
           if (forward.lengthSq() < 0.04) { status('Levante o celular.', 'Aponte à sua frente para iniciar o encontro.'); return; }
           // Uma única direção por encontro, ligeiramente ao lado da mira inicial.
-          forward.normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 9);
-          const position = forward.multiplyScalar(1.3);
+          forward.normalize();
+          const position = forward.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 9).multiplyScalar(1.3);
           position.y = -0.35;
-          root = place({ matrix: new THREE.Matrix4().makeTranslation(position.x, position.y, position.z).elements }, { matrix: camera.matrixWorld.elements });
+          try {
+            root = place({ matrix: new THREE.Matrix4().makeTranslation(position.x, position.y, position.z).elements }, { matrix: camera.matrixWorld.elements }, forward);
+          } catch (error) { end(error.message || 'Não foi possível preparar os personagens.'); return; }
           // Sem plano detectado, não desenhe uma sombra que sugira apoio real.
-          if (root.children[1]) root.children[1].visible = false;
+          if (!root.userData.characters && root.children[1]) root.children[1].visible = false;
           clearTimeout(timer);
         }
         root.visible = true;
         tick(delta);
+        if (root.userData.characters) {
+          const targets = root.userData.characters.map(character => {
+            const relative = character.position.clone().add(new THREE.Vector3(0, character.userData.centerHeight * character.scale.y, 0)).applyMatrix4(camera.matrixWorldInverse);
+            const projected = relative.clone().applyMatrix4(camera.projectionMatrix);
+            return { character, relative, projected, visible: relative.z < 0 && Math.abs(projected.x) < 0.8 && Math.abs(projected.y) < 0.85 };
+          });
+          const visible = targets.filter(t => t.visible).sort((a, b) => Math.abs(a.projected.x) - Math.abs(b.projected.x));
+          const found = root.userData.found;
+          // Exige um breve enquadramento contínuo, para não contar uma passagem rápida.
+          for (const target of targets) {
+            target.character.userData.viewTime = target.visible ? (target.character.userData.viewTime ?? 0) + delta : 0;
+            if (target.character.userData.viewTime >= 0.6) found.add(target.character.userData.id);
+          }
+          root.userData.selected = visible[0]?.character ?? null;
+          const next = targets.filter(t => !found.has(t.character.userData.id)).sort((a,b) => Math.abs(Math.atan2(a.relative.x, -a.relative.z)) - Math.abs(Math.atan2(b.relative.x, -b.relative.z)))[0];
+          const progress = `${found.size} de ${targets.length} encontrados`;
+          const hint = next ? (next.relative.z >= 0 ? 'Olhe para trás.' : Math.abs(next.projected.x) > 0.8 ? (next.relative.x < 0 ? 'Vire para a esquerda.' : 'Vire para a direita.') : next.relative.y < 0 ? 'Aponte um pouco para baixo.' : 'Aponte um pouco para cima.') : 'Você encontrou todos!';
+          if (found.size === targets.length) root.userData.revealMessage?.(camera);
+          status(found.size === targets.length ? 'Você encontrou todos!' : visible.length ? `Você encontrou ${visible[0].character.userData.name}!` : 'Sua surpresa está ao redor.', found.size === targets.length ? 'Sua mensagem 3D apareceu à sua frente. Gire o celular para explorar.' : `${progress} · ${hint}`);
+          renderer.render(scene, camera);
+          return;
+        }
         const relative = root.position.clone().add(new THREE.Vector3(0, 0.19, 0)).applyMatrix4(camera.matrixWorldInverse);
         const projected = relative.clone().applyMatrix4(camera.projectionMatrix);
         const visible = relative.z < 0 && Math.abs(projected.x) < 0.9 && Math.abs(projected.y) < 0.9;

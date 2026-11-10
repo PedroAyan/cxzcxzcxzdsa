@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Mew",
+    "bytes": 323472,
+    "meshes": 1,
+    "animations": 1
+  },
+  {
+    "name": "My Melody",
+    "bytes": 228688,
+    "meshes": 13,
+    "animations": 0
+  },
+  {
+    "name": "Rick Sanchez",
+    "bytes": 798508,
+    "meshes": 11,
+    "animations": 0
+  },
+  {
+    "name": "Coraline",
+    "bytes": 5715000,
+    "meshes": 2,
+    "animations": 0
+  },
+  {
+    "name": "Flor de sakura",
+    "bytes": 56768,
+    "meshes": 1,
+    "animations": 0
+  },
+  {
+    "name": "Sylveon",
+    "bytes": 494180,
+    "meshes": 4,
+    "animations": 0
+  },
+  {
+    "name": "Umbreon",
+    "bytes": 188980,
+    "meshes": 3,
+    "animations": 0
+  }
+]

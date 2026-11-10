@@ -1,4 +1,5 @@
 import { createOrientationEncounter } from './orientation.js';
+import { CHARACTERS, placeBirthday } from './birthday.js';
 
 const OBJETO = {
   id: "mew",
@@ -79,7 +80,14 @@ function initializeExperience() {
   let recoveryMessageUntil = 0;
   let lastFrameTime = 0;
   let orientationEncounter = null;
+  let birthday = null;
+  let birthdayTemplates = [];
   const surfaceMode = params.get('modo') === 'superficie';
+  if (!surfaceMode) {
+    document.querySelector('#nome-objeto').textContent = 'Sua surpresa';
+    document.querySelector('#descricao-objeto').textContent = 'Sete encontros para um aniversário especial.';
+    document.title = 'Surpresa de aniversário — Mundo de bolso';
+  }
 
   function setArNote(message, isError = false) {
     arNote.textContent = message;
@@ -106,12 +114,12 @@ function initializeExperience() {
 
     if (!surfaceMode) {
       const supported = window.isSecureContext && navigator.mediaDevices?.getUserMedia && 'DeviceOrientationEvent' in window;
-      arButton.disabled = !supported || !webxrReady;
-      arButton.textContent = webxrReady ? 'Iniciar encontro em RA' : webxrLoadError ? 'Encontro indisponível' : 'Preparando encontro…';
+      arButton.disabled = !supported || (!webxrReady && !webxrLoadError);
+      arButton.textContent = webxrReady ? 'Iniciar surpresa em RA' : webxrLoadError ? 'Tentar carregar novamente' : 'Preparando os sete modelos…';
       manualArButton.hidden = !externalArAvailable;
       setArNote(!supported ? 'Câmera e orientação indisponíveis. Abra em HTTPS no Safari ou Chrome do celular.'
         : webxrLoadError ? 'Não foi possível carregar o encontro. Confira a conexão e recarregue a página.'
-        : 'Sem procurar mesa: permita câmera e movimento, depois vire o celular para encontrar Mew. A direção fica fixa; sua caminhada não é rastreada.');
+        : 'Permita câmera e movimento e procure os sete itens ao redor. As posições são sorteadas em cada encontro; sua caminhada não é rastreada.');
       return;
     }
 
@@ -177,13 +185,37 @@ function initializeExperience() {
     if (arRuntimePromise) return arRuntimePromise;
 
     arRuntimePromise = (async () => {
-      const [THREE, { GLTFLoader }, { clone }] = await Promise.all([
+      const [THREE, { GLTFLoader }, { clone }, { FontLoader }, { TextGeometry }] = await Promise.all([
         import("three"),
         import("three/addons/loaders/GLTFLoader.js"),
-        import("three/addons/utils/SkeletonUtils.js")
+        import("three/addons/utils/SkeletonUtils.js"),
+        import("three/addons/loaders/FontLoader.js"),
+        import("three/addons/geometries/TextGeometry.js")
       ]);
 
-      const gltf = await new GLTFLoader().loadAsync(OBJETO.glb);
+      const loader = new GLTFLoader();
+      const birthdayFont = surfaceMode ? null : await new FontLoader().loadAsync(new URL('./models/fonts/helvetiker_bold.typeface.json', import.meta.url).href);
+      const entries = surfaceMode ? [CHARACTERS[0]] : CHARACTERS;
+      const loaded = await Promise.allSettled(entries.map(async item => {
+        const gltf = await loader.loadAsync(new URL(item.path, import.meta.url).href);
+        if (!gltf.scene?.getObjectByProperty('isMesh', true)) throw new Error(`Cena inválida: ${item.name}`);
+        return { ...item, gltf };
+      }));
+      const failed = loaded.find(result => result.status === 'rejected');
+      if (failed) {
+        const disposed = new Set();
+        loaded.filter(r => r.status === 'fulfilled').forEach(r => r.value.gltf.scene.traverse(node => {
+          for (const resource of [node.geometry, ...(Array.isArray(node.material) ? node.material : [node.material])]) {
+            if (!resource || disposed.has(resource)) continue;
+            disposed.add(resource);
+            if (resource.isMaterial) Object.values(resource).filter(v => v?.isTexture).forEach(t => { if (!disposed.has(t)) { disposed.add(t); t.dispose(); } });
+            resource.dispose();
+          }
+        }));
+        throw failed.reason;
+      }
+      birthdayTemplates = loaded.map(r => r.value);
+      const gltf = birthdayTemplates[0].gltf;
       if (!gltf.scene || gltf.scene.getObjectByProperty("isMesh", true) === undefined) {
         throw new Error("O GLB não contém uma cena 3D válida.");
       }
@@ -193,6 +225,8 @@ function initializeExperience() {
 
       animationClip = gltf.animations.find((clip) => clip.name.toLowerCase() === "idle") ?? gltf.animations[0];
       arRuntime = createThreeScene(THREE, gltf.scene, clone);
+      arRuntime.birthdayFont = birthdayFont;
+      arRuntime.TextGeometry = TextGeometry;
       return arRuntime;
     })();
 
@@ -426,6 +460,11 @@ function initializeExperience() {
   function cleanUpXrSession() {
     orientationEncounter?.stop();
     orientationEncounter = null;
+    if (birthday) {
+      birthday.dispose();
+      birthday = null;
+      placedRoot = null;
+    }
     if (arRuntime?.renderer) arRuntime.renderer.setAnimationLoop(null);
     if (placedMixer) {
       placedMixer.stopAllAction();
@@ -606,6 +645,13 @@ function initializeExperience() {
 
   arButton.addEventListener("click", () => {
     if (!surfaceMode) {
+      if (webxrLoadError) {
+        webxrLoadError = null;
+        arRuntimePromise = null;
+        prepareEncounter();
+        updateArControls();
+        return;
+      }
       if (encounterIsActive || !webxrReady) return;
       encounterIsActive = true;
       updateArControls();
@@ -616,8 +662,14 @@ function initializeExperience() {
         runtime: arRuntime,
         video: document.querySelector('#camera-encontro'),
         status: setXrStatus,
-        place: makePlacedCharacter,
-        tick: delta => { if (!arRuntime.animationPaused) placedMixer?.update(delta); },
+        place: (_transform, _viewer, forward) => {
+          birthday = placeBirthday(arRuntime, birthdayTemplates, forward);
+          placedRoot = birthday.root;
+          xrHud.classList.add('is-placed');
+          document.querySelectorAll('[data-encounter]').forEach(button => { button.disabled = false; });
+          return placedRoot;
+        },
+        tick: delta => { if (!arRuntime.animationPaused) birthday?.update(delta); },
         end: message => { cleanUpXrSession(); setArNote(message, true); arButton.focus(); }
       });
       orientationEncounter.start();
@@ -646,13 +698,14 @@ function initializeExperience() {
   });
   document.querySelectorAll('[data-encounter]').forEach(button => {
     button.addEventListener('click', () => {
-      if (!placedRoot) return;
+      const target = birthday ? birthday.root.userData.selected : placedRoot;
+      if (!target) return;
       const action = button.dataset.encounter;
       if (action === 'left' || action === 'right') {
-        placedRoot.rotateY((action === 'left' ? -1 : 1) * Math.PI / 6);
+        target.rotateY((action === 'left' ? -1 : 1) * Math.PI / 6);
       } else {
-        const size = Math.max(0.4, Math.min(2.5, placedRoot.scale.x * (action === 'in' ? 1.15 : 1 / 1.15)));
-        placedRoot.scale.setScalar(size);
+        const size = Math.max(0.4, Math.min(2.5, target.scale.x * (action === 'in' ? 1.15 : 1 / 1.15)));
+        target.scale.setScalar(size);
       }
     });
   });

@@ -1,3 +1,25 @@
+# Mensagem 3D — 10/11/2026
+
+A conclusão dos sete itens agora revela letras extrudadas Feliz aniversário! no ambiente, em rosa e dourado. A mensagem surge uma única vez à frente da direção horizontal da câmera na conclusão, em uma posição virtual fixa; não acompanha a câmera. Não há ancoragem no chão nem rastreamento de caminhada. O painel apenas informa que todos foram encontrados.
+
+A fonte Helvetiker Bold veio do repositório three.js r187; licença em models/fonts/LICENSE.txt. Foi acrescentado o glifo á a partir do a para preservar o português. A geometria e os materiais exclusivos são liberados ao encerrar. Fonte indisponível impede a preparação do encontro e permite tentar novamente.
+
+Validação: testes de volume das letras, acento, revelação única, posição fixa e descarte passaram, assim como os testes existentes. Mensagem renderizada e inspecionada no navegador. Teste físico em celular continua pendente.
+
+---
+# Atualização — surpresa de aniversário, 10/11/2026
+
+O modo principal agora carrega sete itens: Mew e os seis GLB fornecidos pelo usuário em modelos-aniversario. Em cada sessão, sorteia os itens entre sete setores ao redor da direção inicial, com pequena variação angular e distância virtual de 1,7 unidade. Os modelos são ajustados por suas dimensões; nenhuma posição é recalculada para acompanhar o visor. O usuário encontra cada item enquadrando seu centro por pelo menos 0,6 segundo. Ao encontrar os sete, aparece Feliz aniversário. Controles de giro e escala afetam o item visível mais central; pausa afeta os clips existentes. Só Mew tem animação nos arquivos atuais. O Sylveon veio com fitas esticadas em pose aberta.
+
+Este escopo substitui a limitação anterior de um personagem no modo principal. Continua sem rastreamento de caminhada ou reconhecimento de chão. O modo opcional de superfície e o visualizador externo permanecem somente com Mew. A prévia da página também continua sendo do Mew.
+
+Carregamento exige os sete arquivos; em falha oferece nova tentativa e libera recursos carregados na tentativa incompleta. Templates ficam em cache durante a página; instâncias e mixers são removidos ao encerrar. Negar câmera ou sensores encerra o encontro, e sair da página libera a câmera. Os GLB originais do usuário não foram alterados.
+
+Validação local: sete arquivos relidos com texturas, 100 sorteios sem sobreposição, escala e apoio de modelos com origem deslocada, três ciclos sem duplicações; orientação simulada encontrou os sete e mostrou a mensagem final, manteve as posições, ocultou o grupo sem sensores e tratou permissão negada. Os sete modelos foram visualizados no navegador; a página real carregou o runtime e habilitou Iniciar surpresa em RA. Não houve teste físico em iPhone/Android.
+
+Verificação: node scripts/testar-aniversario.mjs e node scripts/testar-orientacao.mjs. As dependências de teste ficam em .cache/ra-assets (three@0.187.0, @gltf-transform/core e @gltf-transform/extensions). O site continua estático e usa as bibliotecas das CDNs já configuradas.
+
+---
 # Atualização de escopo — 06/11/2026
 
 A pedido do usuário, o modo principal passa a ser câmera com orientação, sem reconhecimento de superfície. O personagem 3D animado permanece em uma direção escolhida uma vez por encontro; girar o celular o tira do campo de visão. Não há rastreamento de translação, ancoragem em chão ou medição de distância real. As exigências abaixo de superfície e caminhada se aplicam somente ao modo opcional `?obj=mew&modo=superficie`. Essa decisão substitui os requisitos incompatíveis do escopo anterior. Não prometer equivalência ao rastreamento espacial do Pokémon GO.

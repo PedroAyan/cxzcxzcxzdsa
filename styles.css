@@ -659,6 +659,8 @@ body.xr-active { overscroll-behavior: none; }
 }
 
 .xr-control-button:hover { border-color: var(--ink-soft); }
+.xr-control-button { touch-action: manipulation; user-select: none; }
+.site-footer > span { flex: 1; min-width: 0; }
 .xr-control-stop { border-color: var(--coral-dark); background: var(--coral-dark); color: white; }
 
 body.xr-active {

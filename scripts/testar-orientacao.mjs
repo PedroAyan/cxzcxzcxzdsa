@@ -36,3 +36,27 @@ listener({alpha:0,beta:90,gamma:0}); loop(performance.now()); assert.equal(root.
 encounter.stop(); encounter.stop();
 assert.equal(stops,1);assert.equal(loop,null);assert.equal(listener,null);assert.equal(video.srcObject,null);
 console.log('OK: orientation, landscape, off-center spawn, turn away/return, fixed target, sensor interruption, camera cleanup.');
+const { CHARACTERS, placeBirthday } = await import('../birthday.js');
+let clock = 1000;
+Object.defineProperty(globalThis, 'performance', { value: { now: () => clock }, configurable: true });
+const multiRuntime = { ...runtime, scene: new THREE.Scene(), cloneModel: s => s.clone(true) };
+const templates = CHARACTERS.map(item => ({ ...item, gltf: { scene: new THREE.Mesh(new THREE.BoxGeometry(1,1,1)), animations: [] } }));
+let birthday, lastStatus;
+const multi = createOrientationEncounter({ runtime: multiRuntime, video, status(message){lastStatus=message;},
+  place(_t,_v,forward){birthday=placeBirthday(multiRuntime,templates,forward);return birthday.root;}, tick(){}, end(message){throw Error(message);} });
+await multi.start();
+listener({alpha:0,beta:90,gamma:0});loop(clock);
+const positions = birthday.root.children.map(child => child.position.clone());
+for (const anchor of birthday.root.children) {
+  const alpha = Math.atan2(-anchor.position.x, -anchor.position.z) * 180 / Math.PI;
+  for (let step=0;step<12;step++) { clock+=70;listener({alpha,beta:90,gamma:0});loop(clock); }
+}
+assert.equal(birthday.root.userData.found.size,7);
+assert.equal(lastStatus,'Você encontrou todos!');
+birthday.root.children.forEach((child,i)=>assert.deepEqual(child.position,positions[i]));
+clock+=3000;loop(clock);assert.equal(birthday.root.visible,false);
+multi.stop();birthday.dispose();assert.equal(multiRuntime.scene.children.length,0);
+globalThis.DeviceOrientationEvent.requestPermission=async()=> 'denied';
+let denial='';const denied=createOrientationEncounter({runtime,video,status(){},place(){},tick(){},end(message){denial=message;}});
+await denied.start();assert.match(denial,/Permita movimento/);denied.stop();
+console.log('OK: descoberta dos sete por orientação simulada, mensagem final, posições fixas, sensores interrompidos e permissão negada.');
