@@ -4,6 +4,8 @@ O modo principal contém oito itens, incluindo My Sweet Piano, fornecida na Áre
 
 A conclusão dos oito abre automaticamente a leitura de `FINAL_MESSAGE` e `FINAL_NOTE`, de `birthday.js`, diretamente na tela, em rosa e com fundo transparente. A leitura independe de sensores e das letras 3D, e pode ser reaberta pelo botão Ler frase. Voltar aos personagens fecha a leitura e permite explorar as letras extrudadas quando disponíveis. A cópia 3D permanece oculta durante a leitura para não duplicar o texto. A fonte 3D é opcional e sua falha não pode impedir a conclusão.
 
+Distribuir seis personagens num arco à frente e nas laterais da direção inicial, e dois mais baixos na parte da frente. Nenhum deve surgir atrás da direção inicial. Manter as posições fixas e sortear quem ocupa cada uma. As alturas são virtuais, sem reconhecimento ou ancoragem em chão real.
+
 No encontro, mostrar a contagem de itens encontrados. A descoberta exige 0,6 segundo real no enquadramento, sem usar o delta limitado das animações; interromper sensores zera o tempo parcial. Capturar a pose completa da câmera uma única vez para posicionar a cópia 3D, que depois permanece fixa.
 
 Na área principal, mostrar somente o título Mew e as opções. Manter os avisos de erro e incompatibilidade quando necessários; não reintroduzir os textos explicativos removidos dessa área.

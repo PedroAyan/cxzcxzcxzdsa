@@ -2,6 +2,8 @@
 
 Encontrar os oito itens do modo principal, incluindo My Sweet Piano, abre automaticamente a leitura de `FINAL_MESSAGE` e `FINAL_NOTE`, definidos em `birthday.js`, em rosa e com fundo transparente. A frase deve continuar legível sem sensores e sem fonte/geometria 3D. Oferecer Voltar aos personagens e Ler frase; ocultar a cópia 3D durante a leitura. Quando disponível, a cópia 3D usa a pose completa da câmera na conclusão e depois permanece fixa.
 
+Distribuir os oito itens somente à frente e nas laterais da direção inicial: seis no arco frontal e dois mais baixos na frente. Nenhum atrás. As posições permanecem fixas, com sorteio dos ocupantes; as alturas são virtuais e não representam reconhecimento de chão real.
+
 Mostrar a contagem dos oito itens no encontro. Registrar a descoberta por tempo real de enquadramento, sem depender da taxa de quadros ou do delta limitado da animação, e zerar o tempo parcial se os sensores pararem. A tela inicial continua apenas com o título Mew e as opções na área principal, com avisos de erro quando necessários.
 
 Os oito GLB de exibição devem conter animação real, com pausa conjunta e alternativa suave para movimento reduzido. Preservar os pés e as posições do encontro durante o ciclo. My Melody deve aparecer sem a base verde. Preservar os arquivos fornecidos e gerar os derivados por `scripts/preparar-aniversario.mjs`, em `models/aniversario/`.

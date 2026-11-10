@@ -18,8 +18,9 @@ export const FINAL_NOTE = [
   'fica calada ou me xinga tipo',
   '"vai tomar no cu pedro"',
   '',
-  'se nao quiser fala te amo',
-  'meu dono nao vivo sem o pedro etc',
+  'se nao quiser q eu de fala tipo',
+  '"te amo pedro" "meu dono"',
+  '"nao vivo sem voce"',
 ];
 
 function fitBirthdayMessage(message, camera) {
@@ -29,14 +30,24 @@ function fitBirthdayMessage(message, camera) {
     viewHeight * 0.64 / message.userData.baseHeight));
 }
 
-// Setores separados: sorteia quem ocupa cada direção, sem sobrepor os modelos.
+// Seis posições no arco frontal e duas mais baixas na frente. Nunca atrás
+// da direção inicial; sorteia apenas quem ocupa cada posição.
 export function arrangeCharacters(items, random = Math.random) {
   const shuffled = [...items];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  return shuffled.map((item, i) => ({ item, angle: Math.PI / 9 + i * 2 * Math.PI / items.length + (random() - 0.5) * 0.16 }));
+  const lowerCount = items.length >= 4 ? 2 : 0;
+  const upperCount = items.length - lowerCount;
+  return shuffled.map((item, i) => {
+    const lower = i >= upperCount;
+    const index = lower ? i - upperCount : i;
+    const count = lower ? lowerCount : upperCount;
+    const halfArc = (lower ? 18 : 70) * Math.PI / 180;
+    const angle = (count > 1 ? -halfArc + index * 2 * halfArc / (count - 1) : 0) + (random() - 0.5) * 0.04;
+    return { item, angle, height: lower ? -1.2 : -0.45, distance: lower ? 1.9 : 1.7 };
+  });
 }
 
 export function placeBirthday(runtime, templates, forward) {
@@ -45,10 +56,10 @@ export function placeBirthday(runtime, templates, forward) {
   const mixers = [];
   const characters = [];
   try {
-    for (const { item, angle } of arrangeCharacters(templates)) {
+    for (const { item, angle, height, distance } of arrangeCharacters(templates)) {
       const anchor = new THREE.Group();
-      anchor.position.copy(forward).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle).multiplyScalar(1.7);
-      anchor.position.y = -0.45;
+      anchor.position.copy(forward).applyAxisAngle(new THREE.Vector3(0, 1, 0), angle).multiplyScalar(distance);
+      anchor.position.y = height;
       anchor.rotation.y = Math.atan2(-anchor.position.x, -anchor.position.z);
       const model = cloneModel(item.gltf.scene);
       const holder = new THREE.Group();

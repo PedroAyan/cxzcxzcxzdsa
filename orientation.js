@@ -101,14 +101,14 @@ export function createOrientationEncounter({ runtime, video, status, place, tick
           root.userData.selected = visible[0]?.character ?? null;
           const next = targets.filter(t => !found.has(t.character.userData.id)).sort((a,b) => Math.abs(Math.atan2(a.relative.x, -a.relative.z)) - Math.abs(Math.atan2(b.relative.x, -b.relative.z)))[0];
           const progressLabel = `${found.size} de ${targets.length} encontrados`;
-          const hint = next ? (next.visible ? 'Mantenha o personagem na tela por um instante.' : next.relative.z >= 0 ? 'Olhe para trás.' : Math.abs(next.projected.x) > 0.95 ? (next.relative.x < 0 ? 'Vire para a esquerda.' : 'Vire para a direita.') : next.relative.y < 0 ? 'Aponte um pouco para baixo.' : 'Aponte um pouco para cima.') : 'Você encontrou todos!';
+          const hint = next ? (next.visible ? 'Mantenha o personagem na tela por um instante.' : next.relative.z >= 0 ? 'Volte para a direção inicial.' : Math.abs(next.projected.x) > 0.95 ? (next.relative.x < 0 ? 'Vire para a esquerda.' : 'Vire para a direita.') : next.relative.y < 0 ? 'Aponte um pouco para baixo.' : 'Aponte um pouco para cima.') : 'Você encontrou todos!';
           if (found.size === targets.length && !completed) {
             completed = true;
             complete?.();
             try { root.userData.revealMessage?.(camera); }
             catch (error) { console.warn('Não foi possível criar as letras 3D; a frase continua disponível na tela.', error); }
           }
-          status(found.size === targets.length ? 'Você encontrou todos!' : visible.length ? `Você encontrou ${visible[0].character.userData.name}!` : 'Sua surpresa está ao redor.', found.size === targets.length ? 'Sua frase está aberta. Use “Ler frase” para vê-la novamente.' : `${progressLabel} · ${hint}`);
+          status(found.size === targets.length ? 'Você encontrou todos!' : visible.length ? `Você encontrou ${visible[0].character.userData.name}!` : 'Procure à frente e nas laterais.', found.size === targets.length ? 'Sua frase está aberta. Use “Ler frase” para vê-la novamente.' : `${progressLabel} · ${hint}`);
           renderer.render(scene, camera);
           return;
         }

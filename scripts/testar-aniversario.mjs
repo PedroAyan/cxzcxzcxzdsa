@@ -50,9 +50,12 @@ for (const item of CHARACTERS) {
 for (let n = 0; n < 100; n++) {
   const layout = arrangeCharacters(CHARACTERS);
   assert.equal(new Set(layout.map(p => p.item.id)).size, CHARACTERS.length);
-  const minGap = 2 * Math.PI / CHARACTERS.length - 0.16;
-  for (let i = 1; i < layout.length; i++) assert.ok(layout[i].angle - layout[i - 1].angle > minGap);
-  assert.ok(2 * Math.PI - layout.at(-1).angle + layout[0].angle > minGap);
+  assert.ok(layout.every(p=>Math.abs(p.angle)<Math.PI/2),'Nenhum item atrás da direção inicial');
+  assert.equal(layout.filter(p=>p.height<-.8).length,2,'Dois itens mais baixos na frente');
+  for(const height of new Set(layout.map(p=>p.height))){
+    const row=layout.filter(p=>p.height===height).sort((a,b)=>a.angle-b.angle);
+    for(let i=1;i<row.length;i++)assert.ok(row[i].angle-row[i-1].angle>0.4,'Itens da mesma altura ficam separados');
+  }
 }
 const scene = new THREE.Scene();
 const templates = CHARACTERS.map(item => {
@@ -63,13 +66,15 @@ const templates = CHARACTERS.map(item => {
   return { ...item, gltf: { scene: group, animations: [] } };
 });
 for (let n = 0; n < 3; n++) {
-  const encounter = placeBirthday({ THREE, scene, cloneModel: s => s.clone(true) }, templates, new THREE.Vector3(0,0,-1));
+  const forward=new THREE.Vector3(0,0,-1).applyAxisAngle(new THREE.Vector3(0,1,0),n*2.1);
+  const encounter = placeBirthday({ THREE, scene, cloneModel: s => s.clone(true) }, templates, forward);
   assert.equal(encounter.root.children.length, CHARACTERS.length);
   for (const anchor of encounter.root.children) {
-    assert.ok(Math.abs(Math.hypot(anchor.position.x, anchor.position.z) - 1.7) < 1e-6);
+    assert.ok(anchor.position.dot(forward)>0,'Fica à frente qualquer que seja a direção inicial');
+    assert.ok(Math.hypot(anchor.position.x,anchor.position.z)>=1.5&&Math.hypot(anchor.position.x,anchor.position.z)<=2.1);
     anchor.updateMatrixWorld(true);
     const bounds = new THREE.Box3().setFromObject(anchor);
-    assert.ok(Math.abs(bounds.min.y + 0.45) < 1e-5);
+    assert.ok(Math.abs(bounds.min.y-anchor.position.y)<1e-5);
     assert.ok(bounds.getSize(new THREE.Vector3()).length() < 1);
   }
   encounter.dispose();

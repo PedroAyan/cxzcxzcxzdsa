@@ -1,5 +1,5 @@
-import { createOrientationEncounter } from './orientation.js?v=frase-6';
-import { CHARACTERS, FINAL_MESSAGE, FINAL_NOTE, placeBirthday } from './birthday.js?v=frase-6';
+import { createOrientationEncounter } from './orientation.js?v=frente-7';
+import { CHARACTERS, FINAL_MESSAGE, FINAL_NOTE, placeBirthday } from './birthday.js?v=frente-7';
 
 const OBJETO = {
   id: "mew",
@@ -140,7 +140,7 @@ function initializeExperience() {
       manualArButton.hidden = !externalArAvailable;
       setArNote(!supported ? 'Câmera e orientação indisponíveis. Abra em HTTPS no Safari ou Chrome do celular.'
         : webxrLoadError ? 'Não foi possível carregar o encontro. Confira a conexão e recarregue a página.'
-        : 'Permita câmera e movimento e procure os oito itens ao redor. As posições são sorteadas em cada encontro; sua caminhada não é rastreada.', !supported || Boolean(webxrLoadError));
+        : 'Procure os oito itens à frente e nas laterais; dois ficam mais baixos na frente. Sua caminhada não é rastreada.', !supported || Boolean(webxrLoadError));
       return;
     }
 

@@ -43,18 +43,21 @@ Object.defineProperty(globalThis, 'performance', { value: { now: () => clock }, 
 const font = new FontLoader().parse(JSON.parse(await readFile(new URL('../models/fonts/helvetiker_bold.typeface.json', import.meta.url), 'utf8')));
 const multiRuntime = { ...runtime, scene: new THREE.Scene(), cloneModel: s => s.clone(true), TextGeometry, birthdayFont: font };
 const templates = CHARACTERS.map(item => ({ ...item, gltf: { scene: new THREE.Mesh(new THREE.BoxGeometry(1,1,1)), animations: [] } }));
-let birthday, lastStatus;
+let birthday, lastStatus, completionCamera;
 const multi = createOrientationEncounter({ runtime: multiRuntime, video, status(message){lastStatus=message;},
-  place(_t,_v,forward){birthday=placeBirthday(multiRuntime,templates,forward);return birthday.root;}, tick(){}, end(message){throw Error(message);} });
+  place(_t,_v,forward){birthday=placeBirthday(multiRuntime,templates,forward);return birthday.root;}, tick(){}, complete(){completionCamera=camera.clone();}, end(message){throw Error(message);} });
 await multi.start();
 listener({alpha:0,beta:90,gamma:0});loop(clock);
 const positions = birthday.root.userData.characters.map(child => child.position.clone());
 for (const anchor of birthday.root.userData.characters) {
   const alpha = Math.atan2(-anchor.position.x, -anchor.position.z) * 180 / Math.PI;
+  assert.ok(Math.abs(alpha)<90,'Encontra todos sem virar para trás');
   for (let step=0;step<12;step++) { clock+=70;listener({alpha,beta:65,gamma:0});loop(clock); }
 }
 assert.equal(birthday.root.userData.found.size,CHARACTERS.length);
 assert.equal(lastStatus,'Você encontrou todos!');
+assert.ok(completionCamera,'A conclusão é disparada durante a busca frontal');
+completionCamera.updateMatrixWorld(true);
 birthday.root.userData.characters.forEach((child,i)=>assert.deepEqual(child.position,positions[i]));
 const message = birthday.root.children.find(child => child.name === 'Mensagem para Camila 3D');
 assert.ok(message, 'Concluir os oito cria as letras reais, além de atualizar o status');
@@ -62,7 +65,7 @@ message.updateMatrixWorld(true);
 for (const line of message.children) {
   const box = line.geometry.boundingBox;
   for (const x of [box.min.x,box.max.x]) for (const y of [box.min.y,box.max.y]) for (const z of [box.min.z,box.max.z]) {
-    const p = new THREE.Vector3(x,y,z).applyMatrix4(line.matrixWorld).project(camera);
+    const p = new THREE.Vector3(x,y,z).applyMatrix4(line.matrixWorld).project(completionCamera);
     assert.ok(Math.abs(p.x)<0.85 && Math.abs(p.y)<0.85 && Math.abs(p.z)<1, 'Mensagem inteira visível ao concluir com o celular inclinado');
   }
 }
