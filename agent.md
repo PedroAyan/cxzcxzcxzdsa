@@ -1,3 +1,12 @@
+# Escopo atual — ajustes de 10/11/2026
+
+O modo principal contém oito itens, incluindo My Sweet Piano, fornecida na Área de Trabalho. Todos têm animação nos GLB de exibição; os sete novos derivados ficam em `models/aniversario/`, e os originais permanecem em `modelos-aniversario/`. A base verde da My Melody foi removida somente do derivado. `scripts/preparar-aniversario.mjs` reproduz os arquivos e registra hashes dos originais. Mantenha a animação dos personagens com o apoio dos pés e as posições virtuais fixas; ofereça pausa e use Idle suave quando houver preferência por movimento reduzido.
+
+A conclusão dos oito revela a mensagem para Camila definida em `FINAL_MESSAGE`, seguida de `FINAL_NOTE`, em `birthday.js`. Todas as letras são rosas, extrudadas, sem painel ou plano de fundo. A largura e a altura devem caber na tela, inclusive ao girar o aparelho, sem prender a mensagem à câmera ou alterar sua posição a cada quadro. Esta atualização substitui o texto Feliz aniversário e o total de sete itens citados no histórico abaixo.
+
+Verificação: `node scripts/testar-aniversario.mjs`, `node scripts/testar-animacoes.mjs` e `node scripts/testar-orientacao.mjs`. O teste de animação lê os GLB reais e verifica deformações, ciclos, apoio, pausa e instâncias clonadas. Testes físicos de câmera/sensores continuam pendentes; não afirmar publicação sem realizá-la.
+
+---
 # Mensagem 3D — 10/11/2026
 
 A conclusão dos sete itens agora revela letras extrudadas Feliz aniversário! no ambiente, em rosa e dourado. A mensagem surge uma única vez à frente da direção horizontal da câmera na conclusão, em uma posição virtual fixa; não acompanha a câmera. Não há ancoragem no chão nem rastreamento de caminhada. O painel apenas informa que todos foram encontrados.

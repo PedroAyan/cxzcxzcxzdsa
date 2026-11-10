@@ -1,3 +1,12 @@
+# Especificação atual — ajustes de 10/11/2026
+
+Encontrar os oito itens do modo principal, incluindo My Sweet Piano, revela o texto para Camila e o recado abaixo dele. O conteúdo está em `FINAL_MESSAGE` e `FINAL_NOTE` de `birthday.js`. Usar letras 3D rosas sobre fundo transparente, sem painel. Enquadrar os dois blocos na largura e na altura disponíveis, com letras menores no recado. A mensagem continua em uma posição virtual fixa escolhida ao concluir; redimensionar a tela só ajusta sua escala.
+
+Os oito GLB de exibição devem conter animação real, com pausa conjunta e alternativa suave para movimento reduzido. Preservar os pés e as posições do encontro durante o ciclo. My Melody deve aparecer sem a base verde. Preservar os arquivos fornecidos e gerar os derivados por `scripts/preparar-aniversario.mjs`, em `models/aniversario/`.
+
+Os testes locais cobrem os oito itens, deformação real dos modelos, continuidade, pausa, apoio, ausência da base verde, conteúdo rosa sem fundo e cinco proporções de tela. Conferir também a aparência no navegador. A experiência de câmera/orientação em aparelho físico e qualquer nova publicação exigem evidência própria. Estes requisitos substituem as descrições de sete itens, ausência de animações nos outros modelos e texto Feliz aniversário presentes no histórico abaixo.
+
+---
 # Mensagem 3D — 10/11/2026
 
 A conclusão dos sete itens agora revela letras extrudadas Feliz aniversário! no ambiente, em rosa e dourado. A mensagem surge uma única vez à frente da direção horizontal da câmera na conclusão, em uma posição virtual fixa; não acompanha a câmera. Não há ancoragem no chão nem rastreamento de caminhada. O painel apenas informa que todos foram encontrados.

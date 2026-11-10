@@ -1,5 +1,5 @@
-import { createOrientationEncounter } from './orientation.js';
-import { CHARACTERS, placeBirthday } from './birthday.js';
+import { createOrientationEncounter } from './orientation.js?v=camila-1';
+import { CHARACTERS, placeBirthday } from './birthday.js?v=camila-2';
 
 const OBJETO = {
   id: "mew",
@@ -85,7 +85,7 @@ function initializeExperience() {
   const surfaceMode = params.get('modo') === 'superficie';
   if (!surfaceMode) {
     document.querySelector('#nome-objeto').textContent = 'Sua surpresa';
-    document.querySelector('#descricao-objeto').textContent = 'Sete encontros para um aniversário especial.';
+    document.querySelector('#descricao-objeto').textContent = 'Oito encontros para um aniversário especial.';
     document.title = 'Surpresa de aniversário — Mundo de bolso';
   }
 
@@ -115,11 +115,11 @@ function initializeExperience() {
     if (!surfaceMode) {
       const supported = window.isSecureContext && navigator.mediaDevices?.getUserMedia && 'DeviceOrientationEvent' in window;
       arButton.disabled = !supported || (!webxrReady && !webxrLoadError);
-      arButton.textContent = webxrReady ? 'Iniciar surpresa em RA' : webxrLoadError ? 'Tentar carregar novamente' : 'Preparando os sete modelos…';
+      arButton.textContent = webxrReady ? 'Iniciar surpresa em RA' : webxrLoadError ? 'Tentar carregar novamente' : 'Preparando os oito modelos…';
       manualArButton.hidden = !externalArAvailable;
       setArNote(!supported ? 'Câmera e orientação indisponíveis. Abra em HTTPS no Safari ou Chrome do celular.'
         : webxrLoadError ? 'Não foi possível carregar o encontro. Confira a conexão e recarregue a página.'
-        : 'Permita câmera e movimento e procure os sete itens ao redor. As posições são sorteadas em cada encontro; sua caminhada não é rastreada.');
+        : 'Permita câmera e movimento e procure os oito itens ao redor. As posições são sorteadas em cada encontro; sua caminhada não é rastreada.');
       return;
     }
 
@@ -275,6 +275,7 @@ function initializeExperience() {
       modelTemplate,
       cloneModel,
       reticleGroup,
+      reducedMotion: prefersReducedMotion,
       animationPaused: prefersReducedMotion
     };
   }
@@ -729,6 +730,7 @@ function initializeExperience() {
     arRuntime.renderer.setSize(window.innerWidth, window.innerHeight, false);
     arRuntime.camera.aspect = window.innerWidth / window.innerHeight;
     arRuntime.camera.updateProjectionMatrix();
+    birthday?.resizeMessage(arRuntime.camera);
   });
 
   window.addEventListener("pagehide", () => {

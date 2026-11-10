@@ -7,38 +7,44 @@
   },
   {
     "name": "My Melody",
-    "bytes": 228688,
-    "meshes": 13,
-    "animations": 0
+    "bytes": 343836,
+    "meshes": 12,
+    "animations": 2
+  },
+  {
+    "name": "My Sweet Piano",
+    "bytes": 719332,
+    "meshes": 2,
+    "animations": 2
   },
   {
     "name": "Rick Sanchez",
-    "bytes": 798508,
+    "bytes": 781972,
     "meshes": 11,
-    "animations": 0
+    "animations": 2
   },
   {
     "name": "Coraline",
-    "bytes": 5715000,
+    "bytes": 6651624,
     "meshes": 2,
-    "animations": 0
+    "animations": 2
   },
   {
     "name": "Flor de sakura",
-    "bytes": 56768,
+    "bytes": 90864,
     "meshes": 1,
-    "animations": 0
+    "animations": 2
   },
   {
     "name": "Sylveon",
-    "bytes": 494180,
+    "bytes": 592036,
     "meshes": 4,
-    "animations": 0
+    "animations": 2
   },
   {
     "name": "Umbreon",
-    "bytes": 188980,
+    "bytes": 496540,
     "meshes": 3,
-    "animations": 0
+    "animations": 2
   }
 ]

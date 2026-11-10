@@ -1,3 +1,16 @@
+# Ajustes da surpresa — 10/11/2026
+
+O encontro agora tem oito itens: Mew, My Melody, My Sweet Piano, Rick, Coraline, sakura, Sylveon e Umbreon. A My Sweet Piano veio de `my_sweet_piano_plushie_with_bones.glb`, fornecido na Área de Trabalho. Os metadados do próprio arquivo indicam [My Sweet Piano Plushie (With Bones), de zHairezt](https://sketchfab.com/3d-models/my-sweet-piano-plushie-with-bones-7f21667d284d455c88ccbb5623be1470), sob CC BY 4.0; o crédito também aparece no rodapé. O contador e a conclusão usam o total de itens, e cada encontro sorteia oito direções.
+
+A mensagem final foi substituída pelo texto para Camila e pelo recado solicitado logo abaixo, com letras 3D rosas e fundo transparente, sem painel. As linhas e os dois tamanhos de letra estão em `birthday.js`. A mensagem permanece em uma direção virtual fixa; sua escala considera largura e altura da tela e é atualizada ao redimensionar, sem mudar a posição no ambiente.
+
+Todos os modelos têm animação no GLB usado no encontro. `models/aniversario/` contém versões geradas, com ciclos Idle de seis segundos e Idle suave para movimento reduzido; o Mew mantém a animação existente. Rick, Sylveon e My Sweet Piano preservam seus esqueletos. Os demais recebem deformações suaves por morph targets; a Piano também usa morphs para manter os pés fixos. A base verde da My Melody foi removida da versão de exibição. Os originais em `modelos-aniversario/` foram preservados, com hashes registrados em `models/aniversario/preparacao.json`.
+
+Reprodução: `node scripts/preparar-aniversario.mjs`. Validação: `node scripts/testar-aniversario.mjs`, `node scripts/testar-animacoes.mjs` e `node scripts/testar-orientacao.mjs`. Os testes verificam arquivos, textura, animação real dos vértices no GLTFLoader, continuidade dos ciclos, pés fixos, movimento reduzido, pausa, oito descobertas, descarte, texto rosa completo e enquadramento em cinco tamanhos. A aparência também foi conferida no navegador. Publicação não realizada nesta alteração; câmera e sensores em celular físico continuam pendentes.
+
+As seções abaixo registram o histórico anterior a estes ajustes.
+
+---
 # Mensagem 3D — 10/11/2026
 
 A conclusão dos sete itens agora revela letras extrudadas Feliz aniversário! no ambiente, em rosa e dourado. A mensagem surge uma única vez à frente da direção horizontal da câmera na conclusão, em uma posição virtual fixa; não acompanha a câmera. Não há ancoragem no chão nem rastreamento de caminhada. O painel apenas informa que todos foram encontrados.

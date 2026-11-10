@@ -1,12 +1,35 @@
 export const CHARACTERS = [
   { id: 'mew', name: 'Mew', path: 'models/mew.glb', size: 0.45 },
-  { id: 'melody', name: 'My Melody', path: 'modelos-aniversario/my_melody_from_sanrio.glb', size: 0.5 },
-  { id: 'rick', name: 'Rick Sanchez', path: 'modelos-aniversario/rick_sanchez.glb', size: 0.7 },
-  { id: 'coraline', name: 'Coraline', path: 'modelos-aniversario/coraline.glb', size: 0.65 },
-  { id: 'sakura', name: 'Flor de sakura', path: 'modelos-aniversario/stylized_cherry_blossom_flower.glb', size: 0.5 },
-  { id: 'sylveon', name: 'Sylveon', path: 'modelos-aniversario/sylveon.glb', size: 0.6 },
-  { id: 'umbreon', name: 'Umbreon', path: 'modelos-aniversario/umbreon.glb', size: 0.6 },
+  { id: 'melody', name: 'My Melody', path: 'models/aniversario/melody.glb', size: 0.5 },
+  { id: 'piano', name: 'My Sweet Piano', path: 'models/aniversario/piano.glb', size: 0.5 },
+  { id: 'rick', name: 'Rick Sanchez', path: 'models/aniversario/rick.glb', size: 0.7 },
+  { id: 'coraline', name: 'Coraline', path: 'models/aniversario/coraline.glb', size: 0.65 },
+  { id: 'sakura', name: 'Flor de sakura', path: 'models/aniversario/sakura.glb', size: 0.5 },
+  { id: 'sylveon', name: 'Sylveon', path: 'models/aniversario/sylveon.glb', size: 0.6 },
+  { id: 'umbreon', name: 'Umbreon', path: 'models/aniversario/umbreon.glb', size: 0.6 },
 ];
+
+const MESSAGE_DISTANCE = 1.45;
+export const FINAL_MESSAGE = [
+  'vc eh mt especial camila,',
+  'sempre q vc precisar de alguem',
+  'vou estar la.',
+];
+export const FINAL_NOTE = [
+  'se quiser q eu te de algo',
+  'fica calada ou me xinga tipo',
+  '"vai tomar no cu pedro"',
+  '',
+  'se nao quiser fala te amo',
+  'meu dono nao vivo sem o pedro etc',
+];
+
+function fitBirthdayMessage(message, camera) {
+  // Reserva margens nas duas direções, inclusive ao girar a tela.
+  const viewHeight = 2 * (MESSAGE_DISTANCE - 0.05) * Math.tan(camera.fov * Math.PI / 360);
+  message.scale.setScalar(Math.min(viewHeight * camera.aspect * 0.8 / message.userData.baseWidth,
+    viewHeight * 0.64 / message.userData.baseHeight));
+}
 
 // Setores separados: sorteia quem ocupa cada direção, sem sobrepor os modelos.
 export function arrangeCharacters(items, random = Math.random) {
@@ -46,9 +69,11 @@ export function placeBirthday(runtime, templates, forward) {
       anchor.userData.id = item.id;
       anchor.userData.centerHeight = size.y * item.size / longest / 2;
       characters.push(anchor);
-      const clip = item.gltf.animations.find(a => a.name.toLowerCase() === 'idle') ?? item.gltf.animations[0];
+      const clip = (runtime.reducedMotion && item.gltf.animations.find(a => a.name === 'Idle suave'))
+        || item.gltf.animations.find(a => a.name.toLowerCase() === 'idle') || item.gltf.animations[0];
       if (clip) {
         const mixer = new THREE.AnimationMixer(model);
+        if (runtime.reducedMotion && clip.name !== 'Idle suave') mixer.timeScale = 0.35;
         mixer.clipAction(clip).play();
         mixers.push(mixer);
       }
@@ -66,21 +91,28 @@ export function placeBirthday(runtime, templates, forward) {
     const direction = camera.getWorldDirection(new THREE.Vector3());
     direction.y = 0;
     if (direction.lengthSq() < 0.04) direction.copy(forward);
-    message.position.copy(direction.normalize().multiplyScalar(1.25));
-    message.position.y = 0.12;
+    message.position.copy(direction.normalize().multiplyScalar(MESSAGE_DISTANCE));
+    message.position.y = 0.04;
     message.rotation.y = Math.atan2(-message.position.x, -message.position.z);
+    fitBirthdayMessage(message, camera);
     root.add(message);
   };
   runtime.scene.add(root);
+  let disposed = false;
   return {
     root,
-    update(delta) { mixers.forEach(m => m.update(delta)); },
+    update(delta) { if (!runtime.animationPaused) mixers.forEach(m => m.update(delta)); },
+    resizeMessage(camera) { if (message) fitBirthdayMessage(message, camera); },
     dispose() {
+      if (disposed) return;
+      disposed = true;
+      const materials = new Set();
       message?.traverse(node => {
         node.geometry?.dispose();
-        if (Array.isArray(node.material)) node.material.forEach(m => m.dispose());
-        else node.material?.dispose();
+        if (Array.isArray(node.material)) node.material.forEach(m => materials.add(m));
+        else if (node.material) materials.add(node.material);
       });
+      materials.forEach(material => material.dispose());
       mixers.forEach(m => { m.stopAllAction(); m.uncacheRoot(m.getRoot()); });
       runtime.scene.remove(root);
       root.clear();
@@ -90,23 +122,35 @@ export function placeBirthday(runtime, templates, forward) {
 
 export function createBirthdayMessage({ THREE, TextGeometry, birthdayFont }) {
   const group = new THREE.Group();
-  group.name = 'Mensagem de aniversário 3D';
-  for (const [text, y, color] of [['Feliz', 0.14, 0xffc85c], ['aniversário!', -0.12, 0xff7eac]]) {
+  group.name = 'Mensagem para Camila 3D';
+  let y = 0;
+  const face = new THREE.MeshStandardMaterial({ color: 0xffa9d3, roughness: 0.65, metalness: 0 });
+  const edge = new THREE.MeshStandardMaterial({ color: 0xb73d77, roughness: 0.7 });
+  const lines = [...FINAL_MESSAGE.map(text => ({ text, size: 0.065, lineHeight: 0.092, block: 'principal' })),
+    ...FINAL_NOTE.map(text => ({ text, size: 0.047, lineHeight: 0.069, block: 'recado' }))];
+  for (const [index, { text, size, lineHeight, block }] of lines.entries()) {
+    if (index === FINAL_MESSAGE.length) y -= 0.055;
+    if (!text) { y -= lineHeight * 0.6; continue; }
     const geometry = new TextGeometry(text, {
-      font: birthdayFont, size: 0.18, depth: 0.035, curveSegments: 6,
-      bevelEnabled: true, bevelSize: 0.003, bevelThickness: 0.003, bevelSegments: 2,
+      font: birthdayFont, size, depth: 0.018, curveSegments: 4,
+      bevelEnabled: true, bevelSize: 0.0007, bevelThickness: 0.0007, bevelSegments: 1,
     });
     geometry.computeBoundingBox();
     const bounds = geometry.boundingBox;
     geometry.translate(-(bounds.min.x + bounds.max.x) / 2, 0, 0);
-    const face = new THREE.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.15 });
-    const edge = new THREE.MeshStandardMaterial({ color: 0xa64268, roughness: 0.5 });
     const mesh = new THREE.Mesh(geometry, [face, edge]);
+    mesh.name = text;
+    mesh.userData.block = block;
     mesh.position.y = y;
     group.add(mesh);
+    y -= lineHeight;
   }
-  // Cabe na visão vertical de um celular sem perder o volume das letras.
+  // Apenas as letras: nenhum painel, plano ou fundo atrás da mensagem.
   const box = new THREE.Box3().setFromObject(group);
-  group.scale.setScalar(0.78 / box.getSize(new THREE.Vector3()).x);
+  const centerY = box.getCenter(new THREE.Vector3()).y;
+  group.children.forEach(mesh => { mesh.position.y -= centerY; });
+  group.userData.baseWidth = box.getSize(new THREE.Vector3()).x;
+  group.userData.baseHeight = box.getSize(new THREE.Vector3()).y;
+  group.scale.setScalar(0.65 / group.userData.baseWidth);
   return group;
 }

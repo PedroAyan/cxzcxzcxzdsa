@@ -51,7 +51,7 @@ for (const anchor of birthday.root.children) {
   const alpha = Math.atan2(-anchor.position.x, -anchor.position.z) * 180 / Math.PI;
   for (let step=0;step<12;step++) { clock+=70;listener({alpha,beta:90,gamma:0});loop(clock); }
 }
-assert.equal(birthday.root.userData.found.size,7);
+assert.equal(birthday.root.userData.found.size,CHARACTERS.length);
 assert.equal(lastStatus,'Você encontrou todos!');
 birthday.root.children.forEach((child,i)=>assert.deepEqual(child.position,positions[i]));
 clock+=3000;loop(clock);assert.equal(birthday.root.visible,false);
@@ -59,4 +59,4 @@ multi.stop();birthday.dispose();assert.equal(multiRuntime.scene.children.length,
 globalThis.DeviceOrientationEvent.requestPermission=async()=> 'denied';
 let denial='';const denied=createOrientationEncounter({runtime,video,status(){},place(){},tick(){},end(message){denial=message;}});
 await denied.start();assert.match(denial,/Permita movimento/);denied.stop();
-console.log('OK: descoberta dos sete por orientação simulada, mensagem final, posições fixas, sensores interrompidos e permissão negada.');
+console.log('OK: descoberta dos oito por orientação simulada, mensagem final, posições fixas, sensores interrompidos e permissão negada.');

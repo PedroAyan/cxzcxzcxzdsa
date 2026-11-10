@@ -1,0 +1,122 @@
+[
+  {
+    "id": "melody",
+    "source": "my_melody_from_sanrio.glb",
+    "sourceSHA256": "552c8c5453582717f929f16d3e7f23b617b88ac83ac3009df8d51a9c0cce8cdf",
+    "bytes": 343836,
+    "animations": [
+      {
+        "name": "Idle",
+        "channels": 12
+      },
+      {
+        "name": "Idle suave",
+        "channels": 12
+      }
+    ],
+    "duration": 6,
+    "greenBaseRemoved": true
+  },
+  {
+    "id": "rick",
+    "source": "rick_sanchez.glb",
+    "sourceSHA256": "69b3b15c49fc0d23f3a2651c2a38affbbc3706ca959f9eef347459e542cfbbc8",
+    "bytes": 781972,
+    "animations": [
+      {
+        "name": "Idle",
+        "channels": 5
+      },
+      {
+        "name": "Idle suave",
+        "channels": 2
+      }
+    ],
+    "duration": 6
+  },
+  {
+    "id": "coraline",
+    "source": "coraline.glb",
+    "sourceSHA256": "eb77f09903a39795ffaba8784577291b028115ff9d0098f3abe6a9896ee79e5f",
+    "bytes": 6651624,
+    "animations": [
+      {
+        "name": "Idle",
+        "channels": 2
+      },
+      {
+        "name": "Idle suave",
+        "channels": 2
+      }
+    ],
+    "duration": 6
+  },
+  {
+    "id": "sakura",
+    "source": "stylized_cherry_blossom_flower.glb",
+    "sourceSHA256": "4f653fb35cd96654052d20bc1b2797b1274f8fec780054b82509a5c338e14c61",
+    "bytes": 90864,
+    "animations": [
+      {
+        "name": "Idle",
+        "channels": 1
+      },
+      {
+        "name": "Idle suave",
+        "channels": 1
+      }
+    ],
+    "duration": 6
+  },
+  {
+    "id": "sylveon",
+    "source": "sylveon.glb",
+    "sourceSHA256": "cb7d0a18ed152ab995b79234de4033c78da1234d1fb6f158993cf2982f331910",
+    "bytes": 592036,
+    "animations": [
+      {
+        "name": "Idle",
+        "channels": 33
+      },
+      {
+        "name": "Idle suave",
+        "channels": 1
+      }
+    ],
+    "duration": 6
+  },
+  {
+    "id": "umbreon",
+    "source": "umbreon.glb",
+    "sourceSHA256": "09f07b119b54176b83f1b8b970d0875ff2a1cf36bd16b73adf47f96fb60c954e",
+    "bytes": 496540,
+    "animations": [
+      {
+        "name": "Idle",
+        "channels": 3
+      },
+      {
+        "name": "Idle suave",
+        "channels": 3
+      }
+    ],
+    "duration": 6
+  },
+  {
+    "id": "piano",
+    "source": "my_sweet_piano_plushie_with_bones.glb",
+    "sourceSHA256": "435436853558bc7b2e9693e29638b87b2a1d258e688d13b3bbadf8f5f155e086",
+    "bytes": 719332,
+    "animations": [
+      {
+        "name": "Idle",
+        "channels": 6
+      },
+      {
+        "name": "Idle suave",
+        "channels": 2
+      }
+    ],
+    "duration": 6
+  }
+]
