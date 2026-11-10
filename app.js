@@ -1,5 +1,6 @@
-import { createOrientationEncounter } from './orientation.js?v=frente-7';
-import { CHARACTERS, FINAL_MESSAGE, FINAL_NOTE, placeBirthday } from './birthday.js?v=sete-8';
+import { createOrientationEncounter } from './orientation.js?v=quiz-9';
+import { CHARACTERS, placeBirthday } from './birthday.js?v=quiz-9';
+import { QUIZ_INTRO, QUIZ_DESCRIPTION, GIFT_MESSAGE, QUESTIONS, createQuiz } from './quiz.js?v=quiz-9';
 
 const OBJETO = {
   id: "mew",
@@ -30,9 +31,16 @@ const xrHint = document.querySelector("#xr-dica");
 const xrPauseButton = document.querySelector("#xr-pausar");
 const xrEndButton = document.querySelector("#xr-encerrar");
 const xrProgress = document.querySelector('#xr-progresso');
-const xrFinalMessage = document.querySelector('#xr-frase');
-const xrReadMessage = document.querySelector('#xr-ler-frase');
-const xrCloseMessage = document.querySelector('#xr-frase-fechar');
+const xrCollectButton = document.querySelector('#xr-coletar');
+const xrQuiz = document.querySelector('#xr-quiz');
+const quizTitle = document.querySelector('#xr-quiz-title');
+const quizDescription = document.querySelector('#xr-quiz-description');
+const quizProgress = document.querySelector('#xr-quiz-progress');
+const quizForm = document.querySelector('#xr-quiz-form');
+const quizOptions = document.querySelector('#xr-quiz-options');
+const quizNext = document.querySelector('#xr-quiz-next');
+const quizStart = document.querySelector('#xr-quiz-start');
+const quizRetry = document.querySelector('#xr-quiz-retry');
 
 const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 const requestedId = params.get("obj");
@@ -85,28 +93,58 @@ function initializeExperience() {
   let birthday = null;
   let birthdayTemplates = [];
   const surfaceMode = params.get('modo') === 'superficie';
+  const quiz = createQuiz();
 
-  document.querySelector('#xr-frase-titulo').textContent = FINAL_MESSAGE.join(' ');
-  const noteParagraphs = FINAL_NOTE.join('\n').split('\n\n').map(text => {
-    const paragraph = document.createElement('p');
-    paragraph.textContent = text.replaceAll('\n', ' ');
-    return paragraph;
-  });
-  document.querySelector('#xr-frase-recado').replaceChildren(...noteParagraphs);
-
-  function showFinalMessage() {
-    if (!birthday || birthday.root.userData.found.size !== birthday.root.userData.characters.length) return;
-    birthday.setMessageVisible(false);
-    xrReadMessage.hidden = false;
-    xrFinalMessage.hidden = false;
-    xrHud.querySelector('details').open = false;
-    xrCloseMessage.focus({ preventScroll: true });
+  function renderQuiz() {
+    const state = quiz.getState(), isQuestion = state.stage === 'question';
+    xrQuiz.classList.toggle('is-question', isQuestion);
+    quizTitle.textContent = state.stage === 'intro' ? QUIZ_INTRO : isQuestion ? state.question.text
+      : state.passed ? GIFT_MESSAGE : 'Tenta de novo, gatinha';
+    quizDescription.textContent = state.stage === 'intro' ? QUIZ_DESCRIPTION : 'Acerte pelo menos uma das quatro perguntas.';
+    quizDescription.hidden = isQuestion || state.passed;
+    quizProgress.hidden = !isQuestion;
+    quizProgress.textContent = isQuestion ? `Pergunta ${state.index + 1} de ${QUESTIONS.length}` : '';
+    quizForm.hidden = !isQuestion;
+    quizStart.hidden = state.stage !== 'intro';
+    quizRetry.hidden = state.stage !== 'result' || state.passed;
+    quizNext.disabled = true;
+    quizOptions.replaceChildren();
+    if (isQuestion) {
+      quizForm.dataset.questionId = state.question.id;
+      quizNext.textContent = state.index === QUESTIONS.length - 1 ? 'Ver resultado' : 'Próxima pergunta';
+      state.question.options.forEach((text, index) => {
+        const label = document.createElement('label');
+        label.className = 'xr-quiz-option';
+        const input = document.createElement('input');
+        input.type = 'radio'; input.name = 'quiz-answer'; input.value = String(index);
+        const span = document.createElement('span'); span.textContent = text;
+        label.append(input, span); quizOptions.append(label);
+      });
+    }
+    xrQuiz.scrollTop = 0;
+    quizTitle.focus({ preventScroll: true });
   }
 
-  function updateDiscoveryProgress(found, total) {
-    const label = `${found} de ${total} encontrados`;
+  function showQuiz() {
+    xrQuiz.hidden = false;
+    xrCollectButton.hidden = true;
+    xrProgress.hidden = true;
+    xrHud.querySelector('details').open = false;
+    renderQuiz();
+  }
+
+  function updateCollectionProgress(collected, total) {
+    const label = `${collected} de ${total} coletados`;
     if (xrProgress.textContent !== label) xrProgress.textContent = label;
-    xrProgress.hidden = false;
+    xrProgress.hidden = collected === total || !xrQuiz.hidden;
+  }
+
+  function updateCollectionSelection(character) {
+    const finished = birthday && birthday.root.userData.collected.size === birthday.root.userData.characters.length;
+    xrCollectButton.hidden = !birthday || finished || !xrQuiz.hidden;
+    xrCollectButton.disabled = !character;
+    const label = character ? `Coletar ${character.userData.name}` : 'Enquadre um personagem';
+    if (xrCollectButton.textContent !== label) xrCollectButton.textContent = label;
   }
 
   function setArNote(message, isError = false) {
@@ -206,16 +244,13 @@ function initializeExperience() {
     if (arRuntimePromise) return arRuntimePromise;
 
     arRuntimePromise = (async () => {
-      const [THREE, { GLTFLoader }, { clone }, { FontLoader }, { TextGeometry }] = await Promise.all([
+      const [THREE, { GLTFLoader }, { clone }] = await Promise.all([
         import("three"),
         import("three/addons/loaders/GLTFLoader.js"),
-        import("three/addons/utils/SkeletonUtils.js"),
-        import("three/addons/loaders/FontLoader.js"),
-        import("three/addons/geometries/TextGeometry.js")
+        import("three/addons/utils/SkeletonUtils.js")
       ]);
 
       const loader = new GLTFLoader();
-      const birthdayFont = surfaceMode ? null : await new FontLoader().loadAsync(new URL('./models/fonts/helvetiker_bold.typeface.json', import.meta.url).href).catch(() => null);
       const entries = surfaceMode ? [CHARACTERS[0]] : CHARACTERS;
       const loaded = await Promise.allSettled(entries.map(async item => {
         const gltf = await loader.loadAsync(new URL(item.path, import.meta.url).href);
@@ -246,8 +281,6 @@ function initializeExperience() {
 
       animationClip = gltf.animations.find((clip) => clip.name.toLowerCase() === "idle") ?? gltf.animations[0];
       arRuntime = createThreeScene(THREE, gltf.scene, clone);
-      arRuntime.birthdayFont = birthdayFont;
-      arRuntime.TextGeometry = TextGeometry;
       return arRuntime;
     })();
 
@@ -480,8 +513,9 @@ function initializeExperience() {
   }
 
   function cleanUpXrSession() {
-    xrFinalMessage.hidden = true;
-    xrReadMessage.hidden = true;
+    xrQuiz.hidden = true;
+    xrCollectButton.hidden = true;
+    quiz.reset();
     xrProgress.hidden = true;
     orientationEncounter?.stop();
     orientationEncounter = null;
@@ -695,8 +729,9 @@ function initializeExperience() {
           return placedRoot;
         },
         tick: delta => { if (!arRuntime.animationPaused) birthday?.update(delta); },
-        progress: updateDiscoveryProgress,
-        complete: showFinalMessage,
+        progress: updateCollectionProgress,
+        selection: updateCollectionSelection,
+        complete: showQuiz,
         end: message => { cleanUpXrSession(); setArNote(message, true); arButton.focus(); }
       });
       orientationEncounter.start();
@@ -709,11 +744,27 @@ function initializeExperience() {
   });
 
   manualArButton.addEventListener("click", openManualAr);
-  xrReadMessage.addEventListener('click', showFinalMessage);
-  xrCloseMessage.addEventListener('click', () => {
-    xrFinalMessage.hidden = true;
-    birthday?.setMessageVisible(true);
-    xrReadMessage.focus({ preventScroll: true });
+  xrCollectButton.addEventListener('click', () => orientationEncounter?.collectSelected());
+  let tapStart = null;
+  xrCanvas.addEventListener('pointerdown', event => {
+    tapStart = event.isPrimary && event.button === 0 ? { x: event.clientX, y: event.clientY, id: event.pointerId } : null;
+  });
+  xrCanvas.addEventListener('pointercancel', () => { tapStart = null; });
+  xrCanvas.addEventListener('pointerup', event => {
+    const start = tapStart; tapStart = null;
+    if (!start || start.id !== event.pointerId || Math.hypot(event.clientX - start.x, event.clientY - start.y) > 12 || !xrQuiz.hidden) return;
+    orientationEncounter?.collectAt(event.clientX, event.clientY, xrCanvas.getBoundingClientRect());
+  });
+  quizStart.addEventListener('click', () => { if (quiz.start()) renderQuiz(); });
+  quizRetry.addEventListener('click', () => { quiz.reset(); quiz.start(); renderQuiz(); });
+  quizOptions.addEventListener('change', () => {
+    quizNext.disabled = !quizOptions.querySelector('input:checked');
+    quizOptions.querySelectorAll('label').forEach(label => label.classList.toggle('is-selected', label.querySelector('input').checked));
+  });
+  quizForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const answer = quizOptions.querySelector('input:checked');
+    if (answer && quiz.answer(quizForm.dataset.questionId, Number(answer.value))) renderQuiz();
   });
 
   document.querySelectorAll('[data-preview]').forEach(button => {
@@ -762,7 +813,6 @@ function initializeExperience() {
     arRuntime.renderer.setSize(window.innerWidth, window.innerHeight, false);
     arRuntime.camera.aspect = window.innerWidth / window.innerHeight;
     arRuntime.camera.updateProjectionMatrix();
-    birthday?.resizeMessage(arRuntime.camera);
   });
 
   window.addEventListener("pagehide", () => {

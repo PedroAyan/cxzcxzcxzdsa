@@ -7,7 +7,7 @@ export function cameraQuaternion(THREE, event, screenAngle = 0) {
     .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -screenAngle * radians));
 }
 
-export function createOrientationEncounter({ runtime, video, status, place, tick, end, progress, complete }) {
+export function createOrientationEncounter({ runtime, video, status, place, tick, end, progress, complete, selection }) {
   const { THREE, camera, renderer, scene } = runtime;
   let active = false, stream = null, root = null, sensor = null;
   let lastSensor = 0, previous = 0, timer = null, completed = false;
@@ -16,6 +16,28 @@ export function createOrientationEncounter({ runtime, video, status, place, tick
     sensor = { alpha: event.alpha, beta: event.beta, gamma: event.gamma };
     lastSensor = performance.now();
   };
+  function canCollect() {
+    return active && !completed && root?.visible && sensor && performance.now() - lastSensor <= 2500;
+  }
+  function collectCharacter(character) {
+    if (!canCollect()) return null;
+    const collected = root.userData.collectCharacter?.(character);
+    if (!collected) return null;
+    selection?.(null);
+    const count = root.userData.collected.size, total = root.userData.characters.length;
+    progress?.(count, total);
+    renderer.render(scene, camera);
+    if (count === total) {
+      completed = true;
+      complete?.();
+      status('Você coletou todos!', 'Seu quiz está pronto.');
+    } else status(`${collected.userData.name} coletado!`, 'Toque nos outros personagens para continuar.');
+    return collected;
+  }
+  function collectAt(clientX, clientY, rect) {
+    if (!canCollect()) return null;
+    return collectCharacter(root.userData.pickCharacter?.(clientX, clientY, camera, rect));
+  }
   function stop() {
     active = false;
     clearTimeout(timer);
@@ -54,9 +76,11 @@ export function createOrientationEncounter({ runtime, video, status, place, tick
         if (!active) return;
         const delta = previous ? Math.min((now - previous) / 1000, 0.08) : 0;
         previous = now;
+        if (completed) { renderer.render(scene, camera); return; }
         if (!sensor || now - lastSensor > 2500) {
           if (root) root.visible = false;
-          root?.userData.characters?.forEach(character => { character.userData.viewStart = null; character.userData.viewTime = 0; });
+          if (root) root.userData.selected = null;
+          selection?.(null);
           renderer.render(scene, camera);
           if (root) status('Aguardando os sensores.', 'Mova o celular devagar para recuperar a orientação.');
           return;
@@ -81,34 +105,19 @@ export function createOrientationEncounter({ runtime, video, status, place, tick
         root.visible = true;
         tick(delta);
         if (root.userData.characters) {
-          const targets = root.userData.characters.map(character => {
+          const targets = root.userData.characters.filter(character => character.visible && !root.userData.collected.has(character.userData.id)).map(character => {
             const relative = character.position.clone().add(new THREE.Vector3(0, character.userData.centerHeight * character.scale.y, 0)).applyMatrix4(camera.matrixWorldInverse);
             const projected = relative.clone().applyMatrix4(camera.projectionMatrix);
             return { character, relative, projected, visible: relative.z < 0 && Math.abs(projected.x) < 0.95 && Math.abs(projected.y) < 0.95 };
           });
           const visible = targets.filter(t => t.visible).sort((a, b) => Math.abs(a.projected.x) - Math.abs(b.projected.x));
-          const found = root.userData.found;
-          // Exige um breve enquadramento contínuo, para não contar uma passagem rápida.
-          for (const target of targets) {
-            const data = target.character.userData;
-            if (!target.visible) data.viewStart = null;
-            else data.viewStart ??= now;
-            // O tempo de descoberta é real; o limite de delta é só da animação.
-            data.viewTime = target.visible ? (now - data.viewStart) / 1000 : 0;
-            if (target.character.userData.viewTime >= 0.6) found.add(target.character.userData.id);
-          }
-          progress?.(found.size, targets.length);
+          const collected = root.userData.collected, total = root.userData.characters.length;
+          progress?.(collected.size, total);
           root.userData.selected = visible[0]?.character ?? null;
-          const next = targets.filter(t => !found.has(t.character.userData.id)).sort((a,b) => Math.abs(Math.atan2(a.relative.x, -a.relative.z)) - Math.abs(Math.atan2(b.relative.x, -b.relative.z)))[0];
-          const progressLabel = `${found.size} de ${targets.length} encontrados`;
-          const hint = next ? (next.visible ? 'Mantenha o personagem na tela por um instante.' : next.relative.z >= 0 ? 'Volte para a direção inicial.' : Math.abs(next.projected.x) > 0.95 ? (next.relative.x < 0 ? 'Vire para a esquerda.' : 'Vire para a direita.') : next.relative.y < 0 ? 'Aponte um pouco para baixo.' : 'Aponte um pouco para cima.') : 'Você encontrou todos!';
-          if (found.size === targets.length && !completed) {
-            completed = true;
-            complete?.();
-            try { root.userData.revealMessage?.(camera); }
-            catch (error) { console.warn('Não foi possível criar as letras 3D; a frase continua disponível na tela.', error); }
-          }
-          status(found.size === targets.length ? 'Você encontrou todos!' : visible.length ? `Você encontrou ${visible[0].character.userData.name}!` : 'Procure à frente e nas laterais.', found.size === targets.length ? 'Sua frase está aberta. Use “Ler frase” para vê-la novamente.' : `${progressLabel} · ${hint}`);
+          selection?.(root.userData.selected);
+          const next = targets.sort((a,b) => Math.abs(Math.atan2(a.relative.x, -a.relative.z)) - Math.abs(Math.atan2(b.relative.x, -b.relative.z)))[0];
+          const hint = next ? (next.visible ? 'Toque no personagem para coletar.' : next.relative.z >= 0 ? 'Volte para a direção inicial.' : Math.abs(next.projected.x) > 0.95 ? (next.relative.x < 0 ? 'Vire para a esquerda.' : 'Vire para a direita.') : next.relative.y < 0 ? 'Aponte um pouco para baixo.' : 'Aponte um pouco para cima.') : '';
+          status(visible.length ? `Toque em ${visible[0].character.userData.name} para coletar.` : 'Procure à frente e nas laterais.', `${collected.size} de ${total} coletados · ${hint}`);
           renderer.render(scene, camera);
           return;
         }
@@ -126,5 +135,5 @@ export function createOrientationEncounter({ runtime, video, status, place, tick
       if (active) end(error.name === 'NotAllowedError' ? 'Permita a câmera e o movimento nas configurações do navegador e tente novamente.' : error.message || 'Não foi possível abrir a câmera.');
     }
   }
-  return { start, stop };
+  return { start, stop, collectAt, collectSelected: () => collectCharacter(root?.userData.selected) };
 }

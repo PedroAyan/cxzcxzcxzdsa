@@ -78,5 +78,19 @@ assert.ok(animated.some((p, i) => p.distanceTo(rest[i]) > 1e-4), 'O encontro rep
 encounter.root.children.forEach((node, i) => assert.deepEqual(node.position, anchors[i], 'Âncoras fixas'));
 runtime.animationPaused = true; encounter.update(1);
 assert.deepEqual(vertices(encounter.root), animated, 'Pausa congela todos os modelos');
+const camera=new THREE.PerspectiveCamera(60,414/749,.01,30);
+const rect={left:17,top:23,width:414,height:749};
+for(const anchor of encounter.root.userData.characters){
+  camera.lookAt(anchor.position.clone().add(new THREE.Vector3(0,anchor.userData.centerHeight,0)));
+  camera.updateMatrixWorld(true);
+  let hit=null;
+  search:for(const y of [0,.06,-.06,.12,-.12,.2,-.2])for(const x of [0,.04,-.04,.08,-.08,.14,-.14]){
+    const candidate=encounter.pickCharacter(rect.left+(x+1)*rect.width/2,rect.top+(1-y)*rect.height/2,camera,rect);
+    if(candidate===anchor){hit=candidate;break search;}
+  }
+  assert.equal(hit,anchor,`${anchor.userData.name}: modelo real animado responde ao toque`);
+  assert.equal(encounter.collectCharacter(hit),anchor);assert.equal(anchor.visible,false);
+}
+assert.equal(encounter.root.userData.collected.size,7);
 encounter.dispose(); encounter.dispose(); assert.equal(scene.children.length, 0);
-console.log('OK: sete modelos deformam no GLTFLoader real; ciclos contínuos, pés fixos, movimento reduzido, instâncias animadas e pausa conjunta.');
+console.log('OK: sete GLB reais animados respondem ao raycast; ciclos, pés, movimento reduzido, instâncias e pausa preservados.');

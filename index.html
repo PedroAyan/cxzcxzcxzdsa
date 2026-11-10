@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#edf4ed">
     <meta name="description" content="Encontre Mew e outros seis personagens em uma surpresa de aniversário em realidade aumentada.">
     <title>Mew — Mundo de bolso</title>
-    <link rel="stylesheet" href="./styles.css?v=frase-6">
+    <link rel="stylesheet" href="./styles.css?v=quiz-9">
     <script type="importmap">
       {
         "imports": {
@@ -15,7 +15,7 @@
         }
       }
     </script>
-    <script type="module" src="./app.js?v=sete-8"></script>
+    <script type="module" src="./app.js?v=quiz-9"></script>
   </head>
   <body>
     <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
@@ -103,7 +103,7 @@
           </li>
           <li>
             <span class="step-number" aria-hidden="true">3</span>
-            <div><h3>Procure os personagens</h3><p>Olhe à frente, para os lados e um pouco para baixo. Mantenha cada personagem na tela até a contagem subir. Ao completar os sete, a frase abre automaticamente.</p></div>
+            <div><h3>Colete os personagens</h3><p>Olhe à frente, para os lados e um pouco para baixo. Toque em cada personagem para coletar: ele desaparece e a contagem sobe. Ao coletar os sete, começa o quiz.</p></div>
           </li>
         </ol>
       </section>
@@ -133,10 +133,16 @@
     <canvas id="xr-canvas" class="xr-canvas" aria-hidden="true"></canvas>
     <section id="xr-overlay" class="xr-overlay" aria-label="Controles do encontro em realidade aumentada" hidden>
       <p id="xr-progresso" class="xr-progress" role="status" aria-live="polite" hidden></p>
-      <section id="xr-frase" class="xr-final-message" aria-labelledby="xr-frase-titulo" hidden>
-        <h2 id="xr-frase-titulo"></h2>
-        <div id="xr-frase-recado"></div>
-        <button id="xr-frase-fechar" class="xr-control-button" type="button">Voltar aos personagens</button>
+      <section id="xr-quiz" class="xr-quiz" aria-labelledby="xr-quiz-title" hidden>
+        <p id="xr-quiz-progress" class="xr-quiz-progress" aria-live="polite" hidden></p>
+        <h2 id="xr-quiz-title" tabindex="-1"></h2>
+        <p id="xr-quiz-description"></p>
+        <form id="xr-quiz-form" hidden>
+          <fieldset id="xr-quiz-options" aria-labelledby="xr-quiz-title"></fieldset>
+          <button id="xr-quiz-next" class="xr-control-button" type="submit" disabled>Próxima pergunta</button>
+        </form>
+        <button id="xr-quiz-start" class="xr-control-button" type="button">Começar quiz</button>
+        <button id="xr-quiz-retry" class="xr-control-button" type="button" hidden>Tentar novamente</button>
       </section>
       <div class="xr-hud">
         <p id="xr-estado" class="xr-status" role="status" aria-live="polite">Preparando a câmera e o rastreamento…</p>
@@ -156,7 +162,7 @@
         </div>
           </div>
         </details>
-        <button id="xr-ler-frase" class="xr-control-button xr-read-message" type="button" hidden>Ler frase</button>
+        <button id="xr-coletar" class="xr-control-button xr-collect-character" type="button" hidden disabled>Enquadre um personagem</button>
         <button id="xr-encerrar" class="xr-control-button xr-control-stop" type="button" aria-label="Encerrar encontro">✕</button>
       </div>
     </section>

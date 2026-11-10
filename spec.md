@@ -1,14 +1,16 @@
 # Especificação atual — ajustes de 10/11/2026
 
-Encontrar os sete personagens do modo principal, incluindo My Sweet Piano, abre automaticamente a leitura de `FINAL_MESSAGE` e `FINAL_NOTE`, definidos em `birthday.js`, em rosa e com fundo transparente. A flor de sakura não participa do encontro. A frase deve continuar legível sem sensores e sem fonte/geometria 3D. Oferecer Voltar aos personagens e Ler frase; ocultar a cópia 3D durante a leitura. Quando disponível, a cópia 3D usa a pose completa da câmera na conclusão e depois permanece fixa.
+Coletar os sete personagens tocando neles ou no botão Coletar personagem enquadrado. O personagem some ao clicar, conta uma única vez e não é coletado só por permanecer visível. A flor de sakura continua fora do encontro. Preservar animações e posições dos personagens restantes e ignorar arrastos, cliques vazios, modelos já coletados e toques com sensores indisponíveis.
+
+Ao coletar os sete, mostrar “parabens gatinha” e “quiz para saber se vc merece algo”, com botão para começar. O quiz de `quiz.js` tem quatro perguntas na ordem pedida, uma escolha por pergunta e resultado apenas depois das quatro. As respostas certas são “vai se fuder pedro”, “se mata porra”, “vou te dar para os bodes” e “fodase boa noite  😡😡😡😡”. Um ou mais acertos libera “voce foi bem camila oque vc quer de presente”; zero acertos oferece nova tentativa sem recoletar. Reiniciar a sessão zera coleta e quiz. Essa sequência substitui as mensagens e letras 3D anteriores; manter rosa e fundo transparente.
 
 Distribuir os sete personagens somente à frente e nas laterais da direção inicial: cinco num arco de aproximadamente 45 graus para cada lado, e dois mais baixos na frente. Os modelos têm 80% do tamanho anterior, a 2,6 e 2,8 unidades virtuais de distância, para caberem melhor na visão. Nenhum atrás. As posições permanecem fixas, com sorteio dos ocupantes; as alturas são virtuais e não representam reconhecimento de chão real.
 
-Mostrar a contagem dos sete personagens no encontro. Registrar a descoberta por tempo real de enquadramento, sem depender da taxa de quadros ou do delta limitado da animação, e zerar o tempo parcial se os sensores pararem. A tela inicial continua apenas com o título Mew e as opções na área principal, com avisos de erro quando necessários.
+Mostrar a contagem dos sete personagens coletados e uma opção de coleta acessível por teclado além do toque direto no modelo. A tela inicial continua apenas com o título Mew e as opções na área principal, com avisos de erro quando necessários.
 
 Os sete GLB de exibição devem conter animação real, com pausa conjunta e alternativa suave para movimento reduzido. Preservar os pés e as posições do encontro durante o ciclo. My Melody deve aparecer sem a base verde. Preservar os arquivos fornecidos e gerar os derivados por `scripts/preparar-aniversario.mjs`, em `models/aniversario/`.
 
-Os testes locais cobrem os sete personagens, ausência da flor, deformação real dos modelos, continuidade, pausa, apoio, ausência da base verde, conteúdo rosa sem fundo e cinco proporções de tela. Conferir também a aparência no navegador. A experiência de câmera/orientação em aparelho físico e qualquer nova publicação exigem evidência própria. Estes requisitos substituem as descrições anteriores presentes no histórico abaixo.
+Os testes locais cobrem os sete personagens, ausência da flor, deformações, raycast nos modelos reais, desaparecimento, coleta sem duplicação, reinício e as 144 combinações de respostas. Conferir o fluxo visual em tela estreita, opções compridas, envio sem seleção, nova tentativa e presente com um acerto. A experiência de câmera/orientação em aparelho físico e qualquer nova publicação exigem evidência própria. Estes requisitos substituem as descrições anteriores presentes no histórico abaixo.
 
 ---
 # Mensagem 3D — 10/11/2026

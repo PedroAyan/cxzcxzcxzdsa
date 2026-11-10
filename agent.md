@@ -2,15 +2,17 @@
 
 O modo principal contém sete personagens, incluindo My Sweet Piano, fornecida na Área de Trabalho. A flor de sakura foi retirada do encontro. Todos os personagens têm animação nos GLB de exibição; os derivados ficam em `models/aniversario/`, e os originais permanecem em `modelos-aniversario/`. A base verde da My Melody foi removida somente do derivado. `scripts/preparar-aniversario.mjs` reproduz os arquivos e registra hashes dos originais. Mantenha a animação dos personagens com o apoio dos pés e as posições virtuais fixas; ofereça pausa e use Idle suave quando houver preferência por movimento reduzido.
 
-A conclusão dos sete abre automaticamente a leitura de `FINAL_MESSAGE` e `FINAL_NOTE`, de `birthday.js`, diretamente na tela, em rosa e com fundo transparente. A leitura independe de sensores e das letras 3D, e pode ser reaberta pelo botão Ler frase. Voltar aos personagens fecha a leitura e permite explorar as letras extrudadas quando disponíveis. A cópia 3D permanece oculta durante a leitura para não duplicar o texto. A fonte 3D é opcional e sua falha não pode impedir a conclusão.
+A coleta agora exige tocar no personagem ou usar o botão Coletar com um personagem enquadrado. Só olhar não coleta. O personagem tocado some imediatamente, cada id conta uma vez e a contagem mostra coletados. Usar raycast na geometria real, inclusive nos modelos com esqueleto, com coordenadas relativas ao canvas e sem coletar durante arrasto ou perda dos sensores.
+
+Ao coletar os sete, abrir “parabens gatinha” e “quiz para saber se vc merece algo”. `quiz.js` contém as quatro perguntas, opções e respostas fornecidas pelo usuário. A primeira resposta certa é “vai se fuder pedro”, conforme a opção escrita. Exigir as quatro respostas antes do resultado; pelo menos um acerto libera “voce foi bem camila oque vc quer de presente”. Zero acertos permite tentar o quiz novamente sem recoletar os personagens. O quiz substitui a frase e as letras 3D anteriores. Preservar texto rosa, fundo transparente, opções legíveis no celular e reiniciar tudo ao encerrar o encontro.
 
 Distribuir cinco personagens num arco frontal de aproximadamente 45 graus para cada lado, e dois mais baixos na frente. Os tamanhos foram reduzidos em 20% e as distâncias virtuais passaram a 2,6 e 2,8 unidades para facilitar o enquadramento. Nenhum deve surgir atrás da direção inicial. Manter as posições fixas e sortear quem ocupa cada uma. As alturas são virtuais, sem reconhecimento ou ancoragem em chão real.
 
-No encontro, mostrar a contagem de itens encontrados. A descoberta exige 0,6 segundo real no enquadramento, sem usar o delta limitado das animações; interromper sensores zera o tempo parcial. Capturar a pose completa da câmera uma única vez para posicionar a cópia 3D, que depois permanece fixa.
+No encontro, mostrar a contagem de personagens coletados. Manter posição e animação dos personagens restantes; os coletados ficam ocultos e sem avançar suas animações.
 
 Na área principal, mostrar somente o título Mew e as opções. Manter os avisos de erro e incompatibilidade quando necessários; não reintroduzir os textos explicativos removidos dessa área.
 
-Verificação: `node scripts/testar-aniversario.mjs`, `node scripts/testar-animacoes.mjs` e `node scripts/testar-orientacao.mjs`. O teste de animação lê os GLB reais e verifica deformações, ciclos, apoio, pausa e instâncias clonadas. Testes físicos de câmera/sensores continuam pendentes; não afirmar publicação sem realizá-la.
+Verificação: `node scripts/testar-aniversario.mjs`, `node scripts/testar-animacoes.mjs`, `node scripts/testar-orientacao.mjs`, `node scripts/testar-coleta.mjs` e `node scripts/testar-quiz.mjs`. Verificar no navegador toque, desaparecimento, coleta dos sete, quatro perguntas, zero acertos com nova tentativa e um acerto liberando o presente. Testes físicos de câmera/sensores continuam pendentes; não afirmar publicação sem realizá-la.
 
 ---
 # Mensagem 3D — 10/11/2026

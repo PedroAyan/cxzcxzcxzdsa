@@ -2,11 +2,9 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import * as THREE from '../.cache/ra-assets/node_modules/three/build/three.module.js';
-import { CHARACTERS, FINAL_MESSAGE, FINAL_NOTE, arrangeCharacters, placeBirthday } from '../birthday.js';
+import { CHARACTERS, arrangeCharacters, placeBirthday } from '../birthday.js';
 import { NodeIO } from '../.cache/ra-assets/node_modules/@gltf-transform/core/dist/index.js';
 import { ALL_EXTENSIONS } from '../.cache/ra-assets/node_modules/@gltf-transform/extensions/dist/index.js';
-import { FontLoader } from '../.cache/ra-assets/node_modules/three/examples/jsm/loaders/FontLoader.js';
-import { TextGeometry } from '../.cache/ra-assets/node_modules/three/examples/jsm/geometries/TextGeometry.js';
 const io = new NodeIO().registerExtensions(ALL_EXTENSIONS);
 const preparation = JSON.parse(await readFile(new URL('../models/aniversario/preparacao.json', import.meta.url), 'utf8'));
 const report = [];
@@ -86,37 +84,4 @@ for (let n = 0; n < 3; n++) {
   assert.equal(scene.children.length, 0, 'Nenhum convidado duplicado após reiniciar');
 }
 await writeFile(new URL('../modelos-aniversario/verificacao-integracao.json', import.meta.url), JSON.stringify(report, null, 2));
-const fontJSON = JSON.parse(await readFile(new URL('../models/fonts/helvetiker_bold.typeface.json', import.meta.url), 'utf8'));
-assert.ok(fontJSON.glyphs['á'], 'Fonte contém o acento de aniversário');
-const greeting = placeBirthday({ THREE, scene, cloneModel: s => s.clone(true), TextGeometry, birthdayFont: new FontLoader().parse(fontJSON) }, templates, new THREE.Vector3(0,0,-1));
-assert.equal(greeting.root.children.length,CHARACTERS.length, 'Mensagem oculta antes de concluir');
-const camera = new THREE.PerspectiveCamera();
-greeting.root.userData.revealMessage(camera);
-const text = greeting.root.children.at(-1);
-assert.equal(text.name,'Mensagem para Camila 3D');
-assert.deepEqual(text.children.map(child=>child.name), [...FINAL_MESSAGE,...FINAL_NOTE].filter(Boolean), 'Texto completo e nenhum fundo');
-assert.ok(text.children.every(child=>child.material[0].color.getHex()===0xffa9d3), 'Fonte rosa');
-greeting.setMessageVisible(false);assert.equal(text.visible,false,'Oculta cópia 3D durante a leitura na tela');
-greeting.setMessageVisible(true);assert.equal(text.visible,true,'Retoma a mensagem 3D ao voltar aos personagens');
-text.updateMatrixWorld(true);
-const bounds = new THREE.Box3().setFromObject(text);
-assert.ok(bounds.getSize(new THREE.Vector3()).z > 0.005, 'Letras têm volume real');
-for (const [width,height] of [[280,1000],[320,740],[375,667],[414,749],[896,414]]) {
-  camera.fov=60;camera.aspect=width/height;camera.updateProjectionMatrix();
-  greeting.resizeMessage(camera);text.updateMatrixWorld(true);camera.updateMatrixWorld(true);
-  const box = new THREE.Box3().setFromObject(text);
-  for(const x of [box.min.x,box.max.x]) for(const y of [box.min.y,box.max.y]) for(const z of [box.min.z,box.max.z]) {
-    const projected=new THREE.Vector3(x,y,z).project(camera);
-    assert.ok(Math.abs(projected.x)<=0.85&&Math.abs(projected.y)<=0.85, `Mensagem cabe em ${width}×${height}`);
-  }
-}
-const fixedPosition = text.position.clone();
-camera.rotation.y = Math.PI;
-greeting.root.userData.revealMessage(camera);
-assert.deepEqual(text.position,fixedPosition, 'Mensagem fica na direção inicial ao virar a câmera');
-assert.equal(greeting.root.children.length,CHARACTERS.length+1,'Mensagem não se duplica');
-let disposed=0;text.children[0].geometry.addEventListener('dispose',()=>disposed++);
-greeting.dispose();assert.equal(disposed,1);assert.equal(scene.children.length,0);
-console.log('OK: mensagem rosa para Camila, recado completo, fundo transparente, revelação única, posição fixa e descarte.');
-console.log('OK: sete GLB sem a flor, texturas, 100 sorteios sem sobreposição, modelos menores e mais distantes, apoio e limpeza.');
-console.log('OK: animações embutidas, ciclos contínuos, movimento reduzido, pés fixos, originais preservados, My Melody sem chão verde e texto em cinco formatos de tela.');
+console.log('OK: sete GLB sem flor, animações e texturas, 100 sorteios frontais, escala menor, distância, apoio e limpeza.');

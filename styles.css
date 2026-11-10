@@ -598,7 +598,7 @@ body.xr-active { overscroll-behavior: none; }
   text-shadow: 0 1px 4px #000, 0 0 12px #000;
 }
 
-.xr-final-message {
+.xr-quiz {
   position: absolute;
   top: 50%;
   left: max(20px, env(safe-area-inset-left));
@@ -613,12 +613,12 @@ body.xr-active { overscroll-behavior: none; }
   overscroll-behavior: contain;
 }
 
-.xr-final-message h2 {
+.xr-quiz h2 {
   margin: 0 auto 24px;
   font: 800 clamp(22px, 6vw, 34px) / 1.2 system-ui, sans-serif;
 }
 
-.xr-final-message p {
+.xr-quiz p {
   max-width: 38ch;
   margin: 0 auto 20px;
   font-size: clamp(16px, 4.2vw, 20px);
@@ -626,8 +626,18 @@ body.xr-active { overscroll-behavior: none; }
   line-height: 1.5;
 }
 
-.xr-final-message button { margin-top: 4px; text-shadow: none; }
-.xr-read-message { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); pointer-events: auto; }
+.xr-quiz button { margin-top: 4px; text-shadow: none; }
+.xr-quiz.is-question h2 { font-size: clamp(19px, 5vw, 24px); }
+.xr-quiz .xr-quiz-progress { font-size: 13px; margin-bottom: 12px; color: white; }
+.xr-quiz fieldset { display: grid; gap: 10px; max-width: 440px; padding: 0; margin: 0 auto 16px; border: 0; }
+.xr-quiz-option { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 12px; border: 1px solid #ffa9d366; border-radius: 12px; background: rgb(20 34 33 / 85%); text-align: left; font-size: 16px; font-weight: 650; line-height: 1.35; cursor: pointer; touch-action: manipulation; user-select: none; }
+.xr-quiz-option input { width: 20px; height: 20px; margin: 0; flex-shrink: 0; accent-color: #ffa9d3; }
+.xr-quiz-option span { min-width: 0; overflow-wrap: anywhere; }
+.xr-quiz-option.is-selected { border-color: #ffa9d3; background: rgb(58 28 45 / 95%); }
+.xr-quiz-option:focus-within { outline: 2px solid #ffa9d3; outline-offset: 2px; }
+.xr-quiz button:disabled { opacity: 0.45; cursor: default; }
+.xr-collect-character { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); pointer-events: auto; max-width: calc(100% - 120px); white-space: nowrap; }
+@media (hover: hover) and (pointer: fine) { .xr-quiz-option:hover { border-color: #ffa9d3; } }
 
 .xr-kicker {
   display: flex;
@@ -703,7 +713,7 @@ body.xr-active .site-header,
 body.xr-active main,
 body.xr-active .site-footer { visibility: hidden; }
 
-body.xr-active #xr-canvas { opacity: 1; }
+body.xr-active #xr-canvas { opacity: 1; pointer-events: auto; touch-action: manipulation; }
 
 @media (min-width: 761px) {
   .site-header { min-height: 76px; }

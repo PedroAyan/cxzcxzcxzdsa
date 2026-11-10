@@ -8,27 +8,6 @@ export const CHARACTERS = [
   { id: 'umbreon', name: 'Umbreon', path: 'models/aniversario/umbreon.glb', size: 0.48 },
 ];
 
-const MESSAGE_DISTANCE = 1.05;
-export const FINAL_MESSAGE = [
-  'gatinha miau miau',
-];
-export const FINAL_NOTE = [
-  'se quiser q eu te de algo',
-  'fica calada ou me xinga tipo',
-  '"vai tomar no cu pedro"',
-  '',
-  'se nao quiser q eu de fala tipo',
-  '"te amo pedro" "meu dono"',
-  '"nao vivo sem voce"',
-];
-
-function fitBirthdayMessage(message, camera) {
-  // Reserva margens nas duas direções, inclusive ao girar a tela.
-  const viewHeight = 2 * (MESSAGE_DISTANCE - 0.05) * Math.tan(camera.fov * Math.PI / 360);
-  message.scale.setScalar(Math.min(viewHeight * camera.aspect * 0.8 / message.userData.baseWidth,
-    viewHeight * 0.64 / message.userData.baseHeight));
-}
-
 // Cinco posições no arco frontal e duas mais baixas na frente. Nunca atrás
 // da direção inicial; sorteia apenas quem ocupa cada posição.
 export function arrangeCharacters(items, random = Math.random) {
@@ -83,87 +62,69 @@ export function placeBirthday(runtime, templates, forward) {
         const mixer = new THREE.AnimationMixer(model);
         if (runtime.reducedMotion && clip.name !== 'Idle suave') mixer.timeScale = 0.35;
         mixer.clipAction(clip).play();
-        mixers.push(mixer);
+        mixers.push({ mixer, anchor });
       }
     }
   } catch (error) {
-    mixers.forEach(m => { m.stopAllAction(); m.uncacheRoot(m.getRoot()); });
+    mixers.forEach(({ mixer }) => { mixer.stopAllAction(); mixer.uncacheRoot(mixer.getRoot()); });
     throw error;
   }
   root.userData.characters = characters;
-  root.userData.found = new Set();
-  let message = null;
-  let messageVisible = true;
-  root.userData.revealMessage = camera => {
-    if (message) return message;
-    if (!runtime.birthdayFont || !runtime.TextGeometry) return null;
-    message = createBirthdayMessage(runtime);
-    // Captura a pose completa uma única vez. Nivelar a direção escondia as
-    // letras quando o último personagem era encontrado com o celular inclinado.
-    camera.updateWorldMatrix(true, false);
-    const direction = camera.getWorldDirection(new THREE.Vector3());
-    camera.getWorldPosition(message.position).addScaledVector(direction, MESSAGE_DISTANCE);
-    camera.getWorldQuaternion(message.quaternion);
-    fitBirthdayMessage(message, camera);
-    message.visible = messageVisible;
-    root.add(message);
-    return message;
-  };
-  runtime.scene.add(root);
+  const collected = new Set();
+  root.userData.collected = collected;
+  const raycaster = new THREE.Raycaster();
   let disposed = false;
+
+  function collectCharacter(character) {
+    if (disposed || !root.visible || !characters.includes(character) || !character.visible
+      || collected.has(character.userData.id)) return null;
+    character.visible = false;
+    collected.add(character.userData.id);
+    if (root.userData.selected === character) root.userData.selected = null;
+    return character;
+  }
+
+  function pickCharacter(clientX, clientY, camera, rect) {
+    if (disposed || !root.visible || rect.width <= 0 || rect.height <= 0
+      || clientX < rect.left || clientY < rect.top || clientX > rect.left + rect.width
+      || clientY > rect.top + rect.height) return null;
+    const available = characters.filter(character => character.visible && !collected.has(character.userData.id));
+    camera.updateWorldMatrix(true, false);
+    root.updateMatrixWorld(true);
+    // O volume de seleção acompanha a pose atual dos modelos com esqueleto.
+    for (const character of available) character.traverse(node => {
+      if (!node.isSkinnedMesh) return;
+      node.computeBoundingBox();
+      node.boundingBox.getBoundingSphere(node.boundingSphere ??= new THREE.Sphere());
+    });
+    const point = new THREE.Vector2((clientX - rect.left) / rect.width * 2 - 1,
+      1 - (clientY - rect.top) / rect.height * 2);
+    raycaster.setFromCamera(point, camera);
+    const availableSet = new Set(available);
+    for (const hit of raycaster.intersectObjects(available, true)) {
+      let node = hit.object;
+      while (node && !availableSet.has(node)) node = node.parent;
+      if (node) return node;
+    }
+    return null;
+  }
+
+  root.userData.collectCharacter = collectCharacter;
+  root.userData.pickCharacter = pickCharacter;
+  runtime.scene.add(root);
   return {
     root,
-    update(delta) { if (!runtime.animationPaused) mixers.forEach(m => m.update(delta)); },
-    resizeMessage(camera) { if (message) fitBirthdayMessage(message, camera); },
-    setMessageVisible(visible) { messageVisible = visible; if (message) message.visible = visible; },
+    collectCharacter,
+    pickCharacter,
+    update(delta) {
+      if (!runtime.animationPaused) for (const { mixer, anchor } of mixers) if (anchor.visible) mixer.update(delta);
+    },
     dispose() {
       if (disposed) return;
       disposed = true;
-      const materials = new Set();
-      message?.traverse(node => {
-        node.geometry?.dispose();
-        if (Array.isArray(node.material)) node.material.forEach(m => materials.add(m));
-        else if (node.material) materials.add(node.material);
-      });
-      materials.forEach(material => material.dispose());
-      mixers.forEach(m => { m.stopAllAction(); m.uncacheRoot(m.getRoot()); });
+      mixers.forEach(({ mixer }) => { mixer.stopAllAction(); mixer.uncacheRoot(mixer.getRoot()); });
       runtime.scene.remove(root);
       root.clear();
     },
   };
-}
-
-export function createBirthdayMessage({ THREE, TextGeometry, birthdayFont }) {
-  const group = new THREE.Group();
-  group.name = 'Mensagem para Camila 3D';
-  let y = 0;
-  const face = new THREE.MeshStandardMaterial({ color: 0xffa9d3, roughness: 0.65, metalness: 0 });
-  const edge = new THREE.MeshStandardMaterial({ color: 0xb73d77, roughness: 0.7 });
-  const lines = [...FINAL_MESSAGE.map(text => ({ text, size: 0.065, lineHeight: 0.092, block: 'principal' })),
-    ...FINAL_NOTE.map(text => ({ text, size: 0.047, lineHeight: 0.069, block: 'recado' }))];
-  for (const [index, { text, size, lineHeight, block }] of lines.entries()) {
-    if (index === FINAL_MESSAGE.length) y -= 0.055;
-    if (!text) { y -= lineHeight * 0.6; continue; }
-    const geometry = new TextGeometry(text, {
-      font: birthdayFont, size, depth: 0.018, curveSegments: 4,
-      bevelEnabled: true, bevelSize: 0.0007, bevelThickness: 0.0007, bevelSegments: 1,
-    });
-    geometry.computeBoundingBox();
-    const bounds = geometry.boundingBox;
-    geometry.translate(-(bounds.min.x + bounds.max.x) / 2, 0, 0);
-    const mesh = new THREE.Mesh(geometry, [face, edge]);
-    mesh.name = text;
-    mesh.userData.block = block;
-    mesh.position.y = y;
-    group.add(mesh);
-    y -= lineHeight;
-  }
-  // Apenas as letras: nenhum painel, plano ou fundo atrás da mensagem.
-  const box = new THREE.Box3().setFromObject(group);
-  const centerY = box.getCenter(new THREE.Vector3()).y;
-  group.children.forEach(mesh => { mesh.position.y -= centerY; });
-  group.userData.baseWidth = box.getSize(new THREE.Vector3()).x;
-  group.userData.baseHeight = box.getSize(new THREE.Vector3()).y;
-  group.scale.setScalar(0.65 / group.userData.baseWidth);
-  return group;
 }
