@@ -11,9 +11,7 @@ export const CHARACTERS = [
 
 const MESSAGE_DISTANCE = 1.05;
 export const FINAL_MESSAGE = [
-  'vc eh mt especial camila,',
-  'sempre q vc precisar de alguem',
-  'vou estar la.',
+  'gatinha miau miau',
 ];
 export const FINAL_NOTE = [
   'se quiser q eu te de algo',

@@ -1,5 +1,5 @@
 import { createOrientationEncounter } from './orientation.js?v=camila-3';
-import { CHARACTERS, placeBirthday } from './birthday.js?v=camila-4';
+import { CHARACTERS, placeBirthday } from './birthday.js?v=camila-5';
 
 const OBJETO = {
   id: "mew",
