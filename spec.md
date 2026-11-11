@@ -102,7 +102,7 @@ Referências iniciais a consultar na implementação:
 
 Um personagem substituível e um encontro por vez. Reutilizar o modelo demonstrativo existente ou criatura original simples. Não baixar recursos aleatórios de Pokémon nem extrair código ou arquivos de Pokémon GO; reproduzir a experiência com implementação própria.
 
-Sem leitor de QR embutido, login, catálogo, captura, batalha, multiplayer, mapa ou backend obrigatório. Não incluir serviços pagos ou credenciais sem autorização. Manter acesso HTTPS, inclusive em hospedagem estática quando a solução permitir.
+Sem leitor de QR embutido, catálogo, captura, batalha, multiplayer, mapa ou backend obrigatório. A tela de senha protege a experiência apenas visualmente no navegador; não substitui autenticação de servidor. Não incluir serviços pagos ou credenciais sem autorização. Manter acesso HTTPS, inclusive em hospedagem estática quando a solução permitir.
 
 ## Critérios de aceite
 

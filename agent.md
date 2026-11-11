@@ -70,7 +70,7 @@ Implementar um encontro de personagem em realidade aumentada em um site para cel
 
 ## Escopo
 
-Um personagem, um encontro próximo por sessão, animação de espera, orientação para encontrá-lo e opção de iniciar outro encontro. Sem login, catálogo, captura, batalha ou backend obrigatório.
+Um personagem, um encontro próximo por sessão, animação de espera, orientação para encontrá-lo e opção de iniciar outro encontro. A tela de senha é uma barreira visual no cliente, sem autenticação de servidor. Sem catálogo, captura, batalha ou backend obrigatório.
 
 “Próximo” significa uma posição local no ambiente rastreado. Mapa, surgimento por GPS e persistência geográfica entre sessões exigem especificação adicional. Não solicite GPS para simular proximidade local.
 

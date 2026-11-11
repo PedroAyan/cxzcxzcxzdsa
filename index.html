@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#edf4ed">
     <meta name="description" content="Encontre Mew e outros cinco personagens em uma surpresa de aniversário em realidade aumentada.">
     <title>Mew — Mundo de bolso</title>
-    <link rel="stylesheet" href="./styles.css?v=coracoes-11">
+    <link rel="stylesheet" href="./styles.css?v=login-13">
     <script type="importmap">
       {
         "imports": {
@@ -15,9 +15,20 @@
         }
       }
     </script>
-    <script type="module" src="./app.js?v=opcoes-12"></script>
+    <script type="module" src="./app.js?v=login-13"></script>
   </head>
   <body>
+    <section id="login" class="login-screen" aria-labelledby="login-title">
+      <form id="login-form" class="login-card">
+        <span class="login-mark" aria-hidden="true">✦</span>
+        <p class="section-kicker">Mundo de bolso</p>
+        <h1 id="login-title">Uma surpresa espera por você</h1>
+        <label for="login-password">Senha</label>
+        <input id="login-password" name="password" type="password" autocomplete="current-password" required autofocus>
+        <button class="button button-primary" type="submit">Entrar</button>
+        <p id="login-error" class="login-error" role="alert" hidden>Senha incorreta. Tente novamente.</p>
+      </form>
+    </section>
     <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
 
     <header class="site-header">

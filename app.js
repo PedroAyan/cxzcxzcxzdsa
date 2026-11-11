@@ -3,6 +3,30 @@ import { CHARACTERS, placeBirthday } from './birthday.js?v=coracoes-11';
 import { QUIZ_INTRO, QUIZ_DESCRIPTION, GIFT_MESSAGE, QUESTIONS, createQuiz } from './quiz.js?v=opcoes-12';
 import { createHeartConfetti } from './confetti.js?v=coracoes-11';
 
+const loginScreen = document.querySelector('#login');
+const loginForm = document.querySelector('#login-form');
+const loginError = document.querySelector('#login-error');
+const LOGIN_PASSWORD_HASH = '80f563ecc98a3145fc14237415b486396ec6be5e9826ccd0d6ff1686ef2ffc50';
+
+if (sessionStorage.getItem('mundo-de-bolso-auth') === 'ok') {
+  loginScreen.hidden = true;
+} else {
+  loginForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const password = new FormData(loginForm).get('password');
+    const bytes = new TextEncoder().encode(password);
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    const hash = [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+    if (hash === LOGIN_PASSWORD_HASH) {
+      sessionStorage.setItem('mundo-de-bolso-auth', 'ok');
+      loginScreen.hidden = true;
+      return;
+    }
+    loginError.hidden = false;
+    loginForm.elements.password.select();
+  });
+}
+
 const OBJETO = {
   id: "mew",
   nome: "Mew",
