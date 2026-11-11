@@ -39,9 +39,8 @@ a { color: inherit; }
 [hidden] { display: none !important; }
 
 .login-screen { position: fixed; z-index: 20000; inset: 0; display: grid; place-items: center; padding: 24px; background: var(--paper); }
-.login-card { width: min(100%, 390px); display: grid; gap: 14px; padding: clamp(24px, 7vw, 42px); border: 1px solid var(--line); border-radius: 22px 22px 7px 22px; background: var(--paper-bright); box-shadow: 0 18px 60px rgb(25 58 61 / 10%); }
-.login-mark { color: var(--coral-dark); font-size: 30px; }
-.login-card h1 { margin: 0 0 8px; font: 500 clamp(30px, 8vw, 40px)/1.12 Georgia, serif; letter-spacing: -.04em; }
+.login-card { width: min(100%, 350px); display: grid; gap: 14px; padding: clamp(24px, 7vw, 36px); border: 1px solid var(--line); border-radius: 16px; background: var(--paper-bright); box-shadow: 0 12px 36px rgb(25 58 61 / 8%); }
+.login-card h1 { margin: 0 0 6px; font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
 .login-card label { font-size: 13px; font-weight: 700; }
 .login-card input { width: 100%; min-height: 50px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: white; color: var(--ink); font: inherit; }
 .login-error { margin: 0; color: var(--danger); font-size: 13px; }
